@@ -1,24 +1,41 @@
 @import "tailwindcss";
 
+/**
+ * Theme: dusk canvas, terracotta CTAs, periwinkle accents (links / focus / chips).
+ * Utilities: bg-canvas, bg-panel, bg-inset, border-edge, text-ink, text-muted, etc.
+ */
 :root {
-  --background: #0a0a0f;
-  --foreground: #e2e8f0;
+  --canvas: #0c0b10;
+  --ink: #ece9f0;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas: #0c0b10;
+  --color-panel: #15141c;
+  --color-inset: #0f0e14;
+  --color-chip: #2a2834;
+  --color-edge: #34323e;
+  --color-edge-muted: #45424f;
+  --color-ink: #ece9f0;
+  --color-ink-soft: #c9c5d4;
+  --color-muted: #9893a8;
+  --color-faint: #656078;
+  --color-cta: #b4532d;
+  --color-cta-hover: #c95f36;
+  --color-accent: #7c8cc9;
+  --color-accent-soft: #b8c2ef;
+  --color-warm: #d4a84d;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  @apply bg-canvas text-ink antialiased;
+  font-family: var(--font-sans);
 }
 
 ::selection {
-  background: rgb(99 102 241 / 0.3);
-  color: #e2e8f0;
+  background: rgb(124 140 201 / 0.38);
+  color: var(--color-ink);
 }

@@ -67,7 +67,7 @@ function HouseBedGrid({
       {cells.map((mon, i) => (
         <div
           key={i}
-          className={`flex min-w-0 items-center justify-center rounded border border-slate-600/70 bg-slate-950/90 ${
+          className={`flex min-w-0 items-center justify-center rounded border border-edge-muted/70 bg-canvas/90 ${
             compactRow && capacity >= 4
               ? 'aspect-square min-h-[14px]'
               : `aspect-square ${size === 'xs' ? 'min-h-5 sm:min-h-6' : 'min-h-7 sm:min-h-9'}`
@@ -86,7 +86,7 @@ function HouseBedGrid({
             />
           ) : (
             <span
-              className={`select-none text-slate-600 ${
+              className={`select-none text-faint ${
                 size === 'xs'
                   ? 'text-[7px] leading-none'
                   : 'text-[9px] sm:text-[10px]'
@@ -104,7 +104,7 @@ function HouseBedGrid({
 function Chevron({ open }: { open: boolean }) {
   return (
     <svg
-      className={`h-5 w-5 shrink-0 text-slate-500 transition-transform ${open ? 'rotate-180' : ''}`}
+      className={`h-5 w-5 shrink-0 text-faint transition-transform ${open ? 'rotate-180' : ''}`}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
       fill="currentColor"
@@ -131,11 +131,11 @@ function FurnishingItemRow({
     ? `On Serebii’s list for: ${item.serebiiDocumentedFavorites.join(', ')}`
     : 'Not on Serebii’s lists for this house’s favorites — keyword match only';
   return (
-    <li className="flex gap-3 rounded-lg border border-slate-700/80 bg-slate-900/40 p-2.5">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-slate-800 text-xs font-bold text-slate-500">
+    <li className="flex gap-3 rounded-lg border border-edge/80 bg-inset/40 p-2.5">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-panel text-xs font-bold text-faint">
         {rank}
       </span>
-      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-slate-800">
+      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded bg-panel">
         <Image
           src={item.image}
           alt={item.name}
@@ -149,33 +149,33 @@ function FurnishingItemRow({
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="font-medium leading-tight text-slate-100">
+          <span className="font-medium leading-tight text-ink">
             {item.name}
           </span>
           <span
             className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
               onSerebii
                 ? 'bg-emerald-500/15 text-emerald-300 ring-emerald-500/35'
-                : 'bg-slate-700/50 text-slate-400 ring-slate-600'
+                : 'bg-chip/50 text-muted ring-edge-muted'
             }`}
             title={serebiiTitle}
           >
             {onSerebii ? 'Serebii list' : 'Keyword guess'}
           </span>
-          <span className="text-[10px] text-slate-500">
+          <span className="text-[10px] text-faint">
             {item.category} · {item.tag}
           </span>
         </div>
-        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-slate-500">
+        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-faint">
           <span>
             appeal{' '}
-            <span className="tabular-nums text-slate-400">
+            <span className="tabular-nums text-muted">
               {item.totalAppeal}
             </span>
           </span>
           <span>
             spread{' '}
-            <span className="tabular-nums text-slate-400">
+            <span className="tabular-nums text-muted">
               {item.disagreement}
             </span>
           </span>
@@ -184,11 +184,11 @@ function FurnishingItemRow({
           {item.perPokemon.map((pp) => (
             <span
               key={pp.id}
-              className="rounded px-1 py-0.5 text-[9px] text-slate-500"
+              className="rounded px-1 py-0.5 text-[9px] text-faint"
               title={pp.name}
             >
               {pp.name.split(' ')[0]}:{' '}
-              <span className="tabular-nums text-slate-400">{pp.score}</span>
+              <span className="tabular-nums text-muted">{pp.score}</span>
             </span>
           ))}
         </div>
@@ -442,43 +442,43 @@ export default function PlannerPage() {
 
   if (!storeReady || !activeTown) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-400">
+      <div className="flex min-h-screen items-center justify-center bg-canvas text-muted">
         Loading saved towns…
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-12 text-slate-100">
+    <div className="min-h-screen bg-canvas px-4 py-12 text-ink">
       <div className="mx-auto max-w-4xl space-y-10">
         <header className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
             Town &amp; roommate planner
           </h1>
-          <p className="max-w-2xl text-slate-400">
+          <p className="max-w-2xl text-muted">
             Add every Pok&eacute;mon in your town, choose how many 2- and 4-slot
             houses you have, then get a suggested split that keeps habitat types
             separate and lines up favorites. Each house can list ranked item
             ideas (Serebii-backed where we have data, plus keyword guesses) with a
             fairness penalty when one roommate scores much higher than others.
           </p>
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-faint">
             Towns are saved in this browser (localStorage). Up to {MAX_TOWNS}{' '}
             towns; clearing site data removes them. Not synced to a server.
           </p>
         </header>
 
         {/* Saved towns */}
-        <section className="rounded-xl border border-slate-700 bg-slate-800/80 p-4">
+        <section className="rounded-xl border border-edge bg-panel/80 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <label className="flex min-w-48 flex-1 flex-col gap-1">
-              <span className="text-xs font-medium text-slate-400">
+              <span className="text-xs font-medium text-muted">
                 Active town
               </span>
               <select
                 value={activeTownId ?? ''}
                 onChange={(e) => handleSwitchTown(e.target.value)}
-                className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                className="rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm text-ink"
               >
                 {townsSorted.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -496,7 +496,7 @@ export default function PlannerPage() {
                     setShowNewTown(true);
                   }}
                   disabled={towns.length >= MAX_TOWNS}
-                  className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm font-medium text-ink-soft hover:bg-panel disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   New town
                 </button>
@@ -509,12 +509,12 @@ export default function PlannerPage() {
                     value={newTownName}
                     onChange={(e) => setNewTownName(e.target.value)}
                     placeholder="Town name"
-                    className="w-40 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm"
+                    className="w-40 rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm"
                     autoFocus
                   />
                   <button
                     type="submit"
-                    className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+                    className="rounded-lg bg-cta px-3 py-2 text-sm font-medium text-white hover:bg-cta-hover"
                   >
                     Create
                   </button>
@@ -524,7 +524,7 @@ export default function PlannerPage() {
                       setShowNewTown(false);
                       setNewTownName('');
                     }}
-                    className="rounded-lg px-3 py-2 text-sm text-slate-400 hover:text-slate-200"
+                    className="rounded-lg px-3 py-2 text-sm text-muted hover:text-ink-soft"
                   >
                     Cancel
                   </button>
@@ -539,7 +539,7 @@ export default function PlannerPage() {
                     setRenameDraft(activeTown.name);
                     setShowRenameTown(true);
                   }}
-                  className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800"
+                  className="rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm font-medium text-ink-soft hover:bg-panel"
                 >
                   Rename
                 </button>
@@ -555,20 +555,20 @@ export default function PlannerPage() {
                     id="rename-town-input"
                     value={renameDraft}
                     onChange={(e) => setRenameDraft(e.target.value)}
-                    className="w-44 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 sm:w-52"
+                    className="w-44 rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm text-ink sm:w-52"
                     autoFocus
                     autoComplete="off"
                   />
                   <button
                     type="submit"
-                    className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+                    className="rounded-lg bg-cta px-3 py-2 text-sm font-medium text-white hover:bg-cta-hover"
                   >
                     Save name
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowRenameTown(false)}
-                    className="rounded-lg px-3 py-2 text-sm text-slate-400 hover:text-slate-200"
+                    className="rounded-lg px-3 py-2 text-sm text-muted hover:text-ink-soft"
                   >
                     Cancel
                   </button>
@@ -588,17 +588,17 @@ export default function PlannerPage() {
 
         {/* Roster + layout (collapsible when you have a plan) */}
         <details
-          className="rounded-xl border border-slate-700 bg-slate-800"
+          className="rounded-xl border border-edge bg-panel"
           open={setupDetailsOpen}
           onToggle={(e) => setSetupDetailsOpen(e.currentTarget.open)}
         >
           <summary className="cursor-pointer list-none px-5 py-4 marker:hidden [&::-webkit-details-marker]:hidden">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h2 className="text-lg font-semibold text-slate-100">
+                <h2 className="text-lg font-semibold text-ink">
                   Town roster &amp; house layout
                 </h2>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-faint">
                   Add Pok&eacute;mon and bed counts. Collapse this to focus on
                   the plan below.
                 </p>
@@ -606,12 +606,12 @@ export default function PlannerPage() {
               <Chevron open={setupDetailsOpen} />
             </div>
           </summary>
-          <div className="space-y-10 border-t border-slate-700 px-5 pb-5 pt-6">
+          <div className="space-y-10 border-t border-edge px-5 pb-5 pt-6">
         {/* Town roster */}
         <section className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-base font-semibold text-slate-200">Your town</h3>
-            <span className="text-sm text-slate-400">
+            <h3 className="text-base font-semibold text-ink-soft">Your town</h3>
+            <span className="text-sm text-muted">
               {selectedIds.length} Pok&eacute;mon
               {selectedIds.length >= 48 ? ' (max)' : ''}
             </span>
@@ -629,24 +629,24 @@ export default function PlannerPage() {
                 if (searchText.length > 0) setDropdownOpen(true);
               }}
               placeholder="Search by name to add…"
-              className="w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded-lg border border-edge-muted bg-inset px-4 py-2.5 text-sm text-ink placeholder-faint outline-none transition focus:border-accent focus:ring-1 focus:ring-accent"
             />
 
             {dropdownOpen && filteredResults.length > 0 && (
-              <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-slate-700 bg-slate-800 py-1 shadow-lg">
+              <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-edge bg-panel py-1 shadow-lg">
                 {filteredResults.slice(0, 20).map((p) => (
                   <li key={p.id}>
                     <button
                       type="button"
                       onClick={() => addPokemon(p.id)}
                       disabled={selectedIds.length >= 48}
-                      className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition hover:bg-slate-700 disabled:opacity-40"
+                      className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition hover:bg-chip disabled:opacity-40"
                     >
-                      <span className="font-mono text-xs text-slate-500">
+                      <span className="font-mono text-xs text-faint">
                         {p.number}
                       </span>
                       <span>{p.name}</span>
-                      <span className="ml-auto text-xs text-slate-500">
+                      <span className="ml-auto text-xs text-faint">
                         {p.idealHabitat}
                       </span>
                     </button>
@@ -669,7 +669,7 @@ export default function PlannerPage() {
                 return (
                   <span
                     key={id}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-slate-700 px-3 py-1.5 text-sm"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-chip px-3 py-1.5 text-sm"
                   >
                     {p ? (
                       <Image
@@ -683,14 +683,14 @@ export default function PlannerPage() {
                         }}
                       />
                     ) : null}
-                    <span className="font-mono text-xs text-slate-400">
+                    <span className="font-mono text-xs text-muted">
                       {p?.number ?? '…'}
                     </span>
                     {p?.name ?? 'Loading…'}
                     <button
                       type="button"
                       onClick={() => removePokemon(id)}
-                      className="ml-1 cursor-pointer rounded p-0.5 text-slate-400 transition hover:bg-slate-600 hover:text-slate-200"
+                      className="ml-1 cursor-pointer rounded p-0.5 text-muted transition hover:bg-edge-muted hover:text-ink-soft"
                       aria-label="Remove"
                     >
                       <svg
@@ -710,9 +710,9 @@ export default function PlannerPage() {
         </section>
 
         {/* House counts */}
-        <section className="space-y-4 rounded-xl border border-slate-700 bg-slate-900/40 p-5">
-          <h3 className="text-base font-semibold text-slate-200">House layout</h3>
-          <p className="text-sm text-slate-400">
+        <section className="space-y-4 rounded-xl border border-edge bg-inset/40 p-5">
+          <h3 className="text-base font-semibold text-ink-soft">House layout</h3>
+          <p className="text-sm text-muted">
             Pokopia allows up to four Pok&eacute;mon per house, with matching
             habitat type inside each home. You can list more beds than
             Pok&eacute;mon — extra houses stay vacant and partly-filled houses
@@ -720,7 +720,7 @@ export default function PlannerPage() {
           </p>
           <div className="flex flex-wrap gap-6">
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-slate-400">
+              <span className="text-xs font-medium text-muted">
                 2-Pok&eacute;mon houses
               </span>
               <input
@@ -734,11 +734,11 @@ export default function PlannerPage() {
                     housesOf4,
                   )
                 }
-                className="w-28 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm tabular-nums"
+                className="w-28 rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm tabular-nums"
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-slate-400">
+              <span className="text-xs font-medium text-muted">
                 4-Pok&eacute;mon houses
               </span>
               <input
@@ -752,7 +752,7 @@ export default function PlannerPage() {
                     Math.max(0, Math.min(24, +e.target.value || 0)),
                   )
                 }
-                className="w-28 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm tabular-nums"
+                className="w-28 rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm tabular-nums"
               />
             </label>
           </div>
@@ -760,7 +760,7 @@ export default function PlannerPage() {
             className={`rounded-lg px-3 py-2 text-sm ${
               canSuggestHousing
                 ? 'bg-emerald-500/10 text-emerald-300'
-                : 'bg-slate-900 text-slate-400'
+                : 'bg-inset text-muted'
             }`}
           >
             <span className="font-medium tabular-nums">{totalSlots}</span> total
@@ -776,7 +776,7 @@ export default function PlannerPage() {
               </span>
             )}
             {selectedIds.length > 0 && totalSlots > selectedIds.length && (
-              <span className="text-slate-500">
+              <span className="text-faint">
                 {' '}
                 ({totalSlots - selectedIds.length} spare bed
                 {totalSlots - selectedIds.length === 1 ? '' : 's'})
@@ -788,7 +788,7 @@ export default function PlannerPage() {
               type="button"
               onClick={runPartition}
               disabled={!canSuggestHousing || partition.isFetching}
-              className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg bg-cta px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-cta-hover disabled:cursor-not-allowed disabled:opacity-40"
             >
               {partition.isFetching
                 ? deepOptimize
@@ -796,19 +796,19 @@ export default function PlannerPage() {
                   : 'Computing…'
                 : 'Suggest housing'}
             </button>
-            <label className="flex max-w-lg cursor-pointer items-start gap-2 text-sm text-slate-400">
+            <label className="flex max-w-lg cursor-pointer items-start gap-2 text-sm text-muted">
               <input
                 type="checkbox"
                 checked={deepOptimize}
                 onChange={(e) => setDeepOptimize(e.target.checked)}
                 disabled={partition.isFetching}
-                className="mt-0.5 rounded border-slate-500"
+                className="mt-0.5 rounded border-edge-muted"
               />
               <span>
-                <span className="font-medium text-slate-300">
+                <span className="font-medium text-ink-soft">
                   Deeper optimization
                 </span>
-                <span className="block text-xs text-slate-500">
+                <span className="block text-xs text-faint">
                   After the initial plan, try same-habitat swaps and moves to
                   raise total favorite-overlap scores. Slower on large towns;
                   turn off if the page feels stuck.
@@ -840,25 +840,25 @@ export default function PlannerPage() {
 
         {planOk && (
           <section className="space-y-6">
-            <div className="flex flex-wrap items-end justify-between gap-4 rounded-xl border border-slate-700 bg-slate-800/80 p-5">
+            <div className="flex flex-wrap items-end justify-between gap-4 rounded-xl border border-edge bg-panel/80 p-5">
               <div>
                 <h2 className="text-lg font-semibold">Suggested plan</h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-muted">
                   Sum of house compatibility scores:{' '}
-                  <span className="font-semibold text-slate-200 tabular-nums">
+                  <span className="font-semibold text-ink-soft tabular-nums">
                     {planOk.sumHouseCompatibility}
                   </span>
-                  <span className="text-slate-500"> · </span>
+                  <span className="text-faint"> · </span>
                   Average (occupied houses):{' '}
-                  <span className="font-semibold text-slate-200 tabular-nums">
+                  <span className="font-semibold text-ink-soft tabular-nums">
                     {planOk.averageHouseCompatibility}%
                   </span>
                 </p>
-                <p className="mt-2 max-w-2xl text-xs text-slate-500">
+                <p className="mt-2 max-w-2xl text-xs text-faint">
                   A low score does not mean you ran out of houses. It means
                   little overlap in the first five favorites between roommates.
                   The default fill is fast; enable{' '}
-                  <span className="text-slate-400">Deeper optimization</span>{' '}
+                  <span className="text-muted">Deeper optimization</span>{' '}
                   before running again to search same-habitat swaps and moves
                   that raise the total (not guaranteed to fix every house).
                 </p>
@@ -867,23 +867,23 @@ export default function PlannerPage() {
                 <button
                   type="button"
                   onClick={expandAllHouses}
-                  className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800"
+                  className="rounded-lg border border-edge-muted bg-inset px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-panel"
                 >
                   Expand all houses
                 </button>
                 <button
                   type="button"
                   onClick={collapseAllHouses}
-                  className="rounded-lg border border-slate-600 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800"
+                  className="rounded-lg border border-edge-muted bg-inset px-3 py-1.5 text-xs font-medium text-ink-soft hover:bg-panel"
                 >
                   Collapse all
                 </button>
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-edge-muted bg-inset px-3 py-1.5 text-xs text-ink-soft hover:bg-panel">
                   <input
                     type="checkbox"
                     checked={showFurnishingIdeas}
                     onChange={(e) => setShowFurnishingIdeas(e.target.checked)}
-                    className="rounded border-slate-500"
+                    className="rounded border-edge-muted"
                   />
                   Show furnishing lists
                 </label>
@@ -891,14 +891,14 @@ export default function PlannerPage() {
             </div>
 
             <div
-              className="rounded-xl border border-slate-700 bg-slate-900/40 p-4"
+              className="rounded-xl border border-edge bg-inset/40 p-4"
               title="Scroll sideways. Tap a plot to open that house and scroll to it. Percent = overlap of each Pokémon’s first five favorites between roommates (0% = no overlap; same habitat still required)."
             >
               <div className="flex flex-wrap items-end justify-between gap-2">
-                <h2 className="text-sm font-semibold text-slate-200">
+                <h2 className="text-sm font-semibold text-ink-soft">
                   Town overview
                 </h2>
-                <p className="max-w-lg text-[11px] leading-snug text-slate-500">
+                <p className="max-w-lg text-[11px] leading-snug text-faint">
                   Tap a plot to jump to that house. % = favorite overlap (top
                   five).
                 </p>
@@ -918,14 +918,14 @@ export default function PlannerPage() {
                         onClick={() => goToHouse(house.index)}
                         className={`w-[4.75rem] shrink-0 rounded-md border px-1.5 py-1 text-left transition sm:w-[5.25rem] ${
                           open
-                            ? 'border-indigo-500/50 bg-indigo-950/30 ring-1 ring-indigo-500/20'
-                            : 'border-slate-700 bg-slate-900/90 hover:border-slate-600'
+                            ? 'border-accent/50 bg-accent/10 ring-1 ring-accent/20'
+                            : 'border-edge bg-inset/90 hover:border-edge-muted'
                         }`}
                       >
-                        <div className="text-[9px] font-medium uppercase tracking-wide text-slate-500">
+                        <div className="text-[9px] font-medium uppercase tracking-wide text-faint">
                           H{hi + 1}
                         </div>
-                        <div className="line-clamp-2 min-h-[1.75rem] text-[10px] leading-tight text-slate-400">
+                        <div className="line-clamp-2 min-h-[1.75rem] text-[10px] leading-tight text-muted">
                           {house.idealHabitat === 'Vacant'
                             ? 'Vacant'
                             : house.idealHabitat}
@@ -951,7 +951,7 @@ export default function PlannerPage() {
                   })}
                 </div>
                 <p
-                  className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-linear-to-l from-slate-900/95 to-transparent"
+                  className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-linear-to-l from-inset/95 to-transparent"
                   aria-hidden
                 />
               </div>
@@ -971,12 +971,12 @@ export default function PlannerPage() {
                         delete houseSectionRefs.current[house.index];
                       }
                     }}
-                    className="scroll-mt-4 rounded-xl border border-slate-700 bg-slate-800"
+                    className="scroll-mt-4 rounded-xl border border-edge bg-panel"
                   >
                     <button
                       type="button"
                       onClick={() => toggleHouseDetail(house.index)}
-                      className="flex w-full items-start gap-3 border-b border-slate-700 bg-slate-900/50 px-4 py-3 text-left transition hover:bg-slate-900/80 sm:items-center sm:gap-4 sm:px-5"
+                      className="flex w-full items-start gap-3 border-b border-edge bg-inset/50 px-4 py-3 text-left transition hover:bg-inset/80 sm:items-center sm:gap-4 sm:px-5"
                     >
                       <div className="hidden w-18 shrink-0 sm:block">
                         <HouseBedGrid
@@ -986,9 +986,9 @@ export default function PlannerPage() {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-slate-100">
+                        <h3 className="font-semibold text-ink">
                           House {hi + 1}
-                          <span className="ml-2 text-sm font-normal text-slate-500">
+                          <span className="ml-2 text-sm font-normal text-faint">
                             {house.capacity} beds ·{' '}
                             {house.idealHabitat === 'Vacant'
                               ? 'vacant'
@@ -996,11 +996,11 @@ export default function PlannerPage() {
                           </span>
                         </h3>
                         {house.pokemon.length === 0 ? (
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs text-faint">
                             Empty house
                           </p>
                         ) : (
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs text-faint">
                             {house.pokemon.length}/{house.capacity} beds ·
                             compatibility{' '}
                             <span
@@ -1020,7 +1020,7 @@ export default function PlannerPage() {
                     {open && (
                       <div className="space-y-8 p-5">
                         <div className="min-w-0">
-                          <h4 className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <h4 className="text-xs font-medium uppercase tracking-wide text-faint">
                             Roommates
                           </h4>
                           <div className="mb-3 mt-2 sm:hidden">
@@ -1033,7 +1033,7 @@ export default function PlannerPage() {
                             </div>
                           </div>
                           {house.pokemon.length === 0 ? (
-                            <p className="mt-2 text-sm text-slate-500">
+                            <p className="mt-2 text-sm text-faint">
                               This house is unused. Extra capacity is fine if you
                               want room to grow or mirror in-game empty homes.
                             </p>
@@ -1042,7 +1042,7 @@ export default function PlannerPage() {
                             {house.pokemon.map((p) => (
                               <li
                                 key={p.id}
-                                className="flex items-center gap-3 rounded-lg bg-slate-900/60 px-3 py-2"
+                                className="flex items-center gap-3 rounded-lg bg-inset/60 px-3 py-2"
                               >
                                 <Image
                                   src={p.sprite}
@@ -1058,7 +1058,7 @@ export default function PlannerPage() {
                                 />
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-baseline gap-2">
-                                    <span className="font-mono text-xs text-slate-500">
+                                    <span className="font-mono text-xs text-faint">
                                       {p.number}
                                     </span>
                                     <span className="font-medium">
@@ -1069,7 +1069,7 @@ export default function PlannerPage() {
                                     {p.favorites.slice(0, 5).map((f) => (
                                       <span
                                         key={f}
-                                        className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-400"
+                                        className="rounded bg-panel px-1.5 py-0.5 text-[10px] text-muted"
                                       >
                                         {f}
                                       </span>
@@ -1081,14 +1081,14 @@ export default function PlannerPage() {
                           </ul>
                           {house.sharedFavorites.length > 0 && (
                             <div className="mt-4">
-                              <span className="text-xs text-slate-500">
+                              <span className="text-xs text-faint">
                                 Everyone loves:{' '}
                               </span>
                               <div className="mt-1 flex flex-wrap gap-1.5">
                                 {house.sharedFavorites.map((f) => (
                                   <span
                                     key={f}
-                                    className="rounded-full bg-indigo-500/15 px-2.5 py-0.5 text-xs text-indigo-300 ring-1 ring-indigo-500/25"
+                                    className="rounded-full bg-accent/15 px-2.5 py-0.5 text-xs text-accent-soft ring-1 ring-accent/25"
                                   >
                                     {f}
                                   </span>
@@ -1099,21 +1099,21 @@ export default function PlannerPage() {
                         </div>
 
                         {showFurnishingIdeas && (
-                          <div className="min-w-0 border-t border-slate-700/80 pt-8">
-                            <h4 className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <div className="min-w-0 border-t border-edge/80 pt-8">
+                            <h4 className="text-xs font-medium uppercase tracking-wide text-faint">
                               Furnishings &amp; items
                             </h4>
                             {house.pokemon.length === 0 ? (
-                              <p className="mt-3 text-sm text-slate-500">
+                              <p className="mt-3 text-sm text-faint">
                                 No suggestions for an empty house.
                               </p>
                             ) : (
                               <>
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className="mt-1 text-xs text-faint">
                                   Items on Serebii&apos;s category lists for this
                                   house&apos;s favorites are shown first (best
                                   documented). Below that, expand{' '}
-                                  <span className="text-slate-400">
+                                  <span className="text-muted">
                                     Keyword guesses only
                                   </span>{' '}
                                   for keyword-ranked picks that are not on those
@@ -1128,7 +1128,7 @@ export default function PlannerPage() {
                                     </h5>
                                     {house.suggestedItems.official.length ===
                                     0 ? (
-                                      <p className="mt-2 text-sm text-slate-500">
+                                      <p className="mt-2 text-sm text-faint">
                                         No items from Serebii&apos;s pages for
                                         this house&apos;s favorites (their lists
                                         may be incomplete, or keyword matches
@@ -1150,7 +1150,7 @@ export default function PlannerPage() {
                                   </div>
                                   {house.suggestedItems.heuristic.length >
                                     0 && (
-                                    <div className="rounded-lg border border-slate-800 bg-slate-900/30">
+                                    <div className="rounded-lg border border-edge bg-inset/30">
                                       <button
                                         type="button"
                                         onClick={() =>
@@ -1160,16 +1160,16 @@ export default function PlannerPage() {
                                               !prev[house.index],
                                           }))
                                         }
-                                        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm text-slate-400 transition hover:bg-slate-800/50 hover:text-slate-300"
+                                        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm text-muted transition hover:bg-panel/50 hover:text-ink-soft"
                                         aria-expanded={Boolean(
                                           heuristicFurnishingOpen[house.index],
                                         )}
                                       >
                                         <span>
-                                          <span className="font-medium text-slate-300">
+                                          <span className="font-medium text-ink-soft">
                                             Keyword guesses only
                                           </span>
-                                          <span className="ml-2 text-xs text-slate-500">
+                                          <span className="ml-2 text-xs text-faint">
                                             (
                                             {
                                               house.suggestedItems.heuristic
@@ -1188,7 +1188,7 @@ export default function PlannerPage() {
                                         />
                                       </button>
                                       {heuristicFurnishingOpen[house.index] && (
-                                        <ol className="space-y-2 border-t border-slate-800 px-3 py-3">
+                                        <ol className="space-y-2 border-t border-edge px-3 py-3">
                                           {house.suggestedItems.heuristic.map(
                                             (item, rank) => (
                                               <FurnishingItemRow
@@ -1218,20 +1218,20 @@ export default function PlannerPage() {
 
         {/* Single-house preview (≤4) */}
         {selectedIds.length > 0 && selectedIds.length <= 4 && data && (
-          <section className="space-y-4 border-t border-slate-800 pt-10">
-            <h2 className="text-lg font-semibold text-slate-300">
+          <section className="space-y-4 border-t border-edge pt-10">
+            <h2 className="text-lg font-semibold text-ink-soft">
               Single-house preview
             </h2>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-faint">
               If you treat the current selection as one house (ignoring the
               multi-house planner above), here is the same compatibility readout
               as before.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div
-                className={`flex flex-col items-center justify-center rounded-xl border border-slate-700 bg-slate-800 p-6 ring-1 ${scoreBg(data.compatibilityScore)}`}
+                className={`flex flex-col items-center justify-center rounded-xl border border-edge bg-panel p-6 ring-1 ${scoreBg(data.compatibilityScore)}`}
               >
-                <span className="text-sm font-medium text-slate-400">
+                <span className="text-sm font-medium text-muted">
                   Compatibility
                 </span>
                 <span
@@ -1240,8 +1240,8 @@ export default function PlannerPage() {
                   {data.compatibilityScore}%
                 </span>
               </div>
-              <div className="rounded-xl border border-slate-700 bg-slate-800 p-6">
-                <h3 className="text-sm font-medium text-slate-400">Habitat</h3>
+              <div className="rounded-xl border border-edge bg-panel p-6">
+                <h3 className="text-sm font-medium text-muted">Habitat</h3>
                 {data.habitatConflicts.length > 0 ? (
                   <p className="mt-2 text-sm text-red-400">
                     Mixed habitat types — not valid as one house.
@@ -1254,8 +1254,8 @@ export default function PlannerPage() {
               </div>
             </div>
             {recs && recs.length > 0 && selectedIds.length < 4 && (
-              <div className="rounded-xl border border-slate-700 bg-slate-800 p-5">
-                <h3 className="text-sm font-medium text-slate-400">
+              <div className="rounded-xl border border-edge bg-panel p-5">
+                <h3 className="text-sm font-medium text-muted">
                   Candidates to add to town
                 </h3>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -1265,7 +1265,7 @@ export default function PlannerPage() {
                       type="button"
                       onClick={() => addPokemon(rec.id)}
                       disabled={selectedIds.length >= 48}
-                      className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 p-2 text-left text-sm hover:border-indigo-500/40"
+                      className="flex items-center gap-2 rounded-lg border border-edge bg-inset p-2 text-left text-sm hover:border-accent/40"
                     >
                       <Image
                         src={rec.sprite}
@@ -1289,7 +1289,7 @@ export default function PlannerPage() {
         )}
 
         {selectedIds.length > 0 && selectedIds.length <= 4 && analysis.isLoading && (
-          <p className="text-center text-sm text-slate-500">Loading preview…</p>
+          <p className="text-center text-sm text-faint">Loading preview…</p>
         )}
       </div>
     </div>

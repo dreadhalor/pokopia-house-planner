@@ -65,7 +65,7 @@ const SCORE_COLORS: Record<number, string> = {
   3: 'text-yellow-400',
   2: 'text-orange-400',
   1: 'text-red-400',
-  0: 'text-slate-500',
+  0: 'text-faint',
 };
 
 const SCORE_LABELS: Record<number, string> = {
@@ -117,8 +117,8 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-slate-700 bg-slate-800 p-5">
-      <h3 className="mb-4 text-lg font-semibold text-slate-100">{title}</h3>
+    <div className="rounded-xl border border-edge bg-panel p-5">
+      <h3 className="mb-4 text-lg font-semibold text-ink">{title}</h3>
       {children}
     </div>
   );
@@ -131,7 +131,7 @@ function ScoreBar({ score }: { score: number }) {
         <div
           key={i}
           className={`h-2 w-5 rounded-full ${
-            i < score ? 'bg-current' : 'bg-slate-700'
+            i < score ? 'bg-current' : 'bg-chip'
           }`}
         />
       ))}
@@ -145,10 +145,10 @@ export default function PokemonDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950">
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
         <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-700 border-t-indigo-500" />
-          <p className="text-slate-400">Loading Pokémon data…</p>
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-edge border-t-accent" />
+          <p className="text-muted">Loading Pokémon data…</p>
         </div>
       </div>
     );
@@ -156,13 +156,13 @@ export default function PokemonDetailPage() {
 
   if (!pokemon) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950">
-        <p className="text-xl font-semibold text-slate-100">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-canvas">
+        <p className="text-xl font-semibold text-ink">
           Pokémon not found
         </p>
         <Link
           href="/pokemon"
-          className="text-indigo-400 underline underline-offset-4 transition-colors hover:text-indigo-300"
+          className="text-accent-soft underline underline-offset-4 transition-colors hover:text-ink"
         >
           ← Back to list
         </Link>
@@ -185,13 +185,13 @@ export default function PokemonDetailPage() {
     .sort((a, b) => b - a);
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-16">
+    <div className="min-h-screen bg-canvas pb-16">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm">
+      <header className="border-b border-edge bg-inset/80 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
           <Link
             href="/pokemon"
-            className="mb-4 inline-flex items-center gap-1.5 text-sm text-indigo-400 transition-colors hover:text-indigo-300"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm text-accent-soft transition-colors hover:text-ink"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -209,7 +209,7 @@ export default function PokemonDetailPage() {
           </Link>
 
           <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-3">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-slate-800/80 ring-1 ring-slate-700">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-panel/80 ring-1 ring-edge">
               <Image
                 src={pokemon.sprite}
                 alt={pokemon.name}
@@ -223,22 +223,22 @@ export default function PokemonDetailPage() {
             </div>
             <div>
               <div className="flex items-end gap-x-3 gap-y-1">
-                <span className="text-2xl font-bold text-slate-500">
+                <span className="text-2xl font-bold text-faint">
                   {pokemon.number}
                 </span>
-                <h1 className="text-3xl font-extrabold tracking-tight text-slate-100 sm:text-4xl">
+                <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
                   {pokemon.name}
                 </h1>
               </div>
 
               <div className="mt-2 flex flex-wrap gap-2">
-                <Pill className="border-slate-600 bg-slate-700/60 text-slate-300">
+                <Pill className="border-edge-muted bg-chip/60 text-ink-soft">
                   📍 {pokemon.location}
                 </Pill>
                 <Pill
                   className={
                     HABITAT_COLORS[pokemon.idealHabitat] ??
-                    'border-slate-600 bg-slate-700/60 text-slate-300'
+                    'border-edge-muted bg-chip/60 text-ink-soft'
                   }
                 >
                   🏠 {pokemon.idealHabitat}
@@ -255,7 +255,7 @@ export default function PokemonDetailPage() {
           {/* Card 1: Specialties & Favorites */}
           <Card title="Specialties & Favorites">
             <div className="mb-4">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-faint">
                 Specialties
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -273,7 +273,7 @@ export default function PokemonDetailPage() {
             </div>
 
             <div className="mb-4">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-faint">
                 Favorites
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -281,7 +281,7 @@ export default function PokemonDetailPage() {
                   <Link
                     key={fav}
                     href={`/favorites/${toFavoriteSlug(fav)}`}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 bg-slate-700/60 px-2.5 py-1 text-xs font-medium text-slate-300 transition-colors hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-300"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-edge-muted bg-chip/60 px-2.5 py-1 text-xs font-medium text-ink-soft transition-colors hover:border-accent/50 hover:bg-accent/10 hover:text-accent-soft"
                     title={`View all "${fav}" items`}
                   >
                     {fav}
@@ -291,10 +291,10 @@ export default function PokemonDetailPage() {
             </div>
 
             <div>
-              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-faint">
                 Flavor
               </p>
-              <p className="text-sm font-medium text-slate-200">
+              <p className="text-sm font-medium text-ink-soft">
                 {pokemon.flavor}
               </p>
             </div>
@@ -303,7 +303,7 @@ export default function PokemonDetailPage() {
           {/* Card 2: Habitats */}
           <Card title="Habitats">
             {pokemon.habitats.length === 0 ? (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-faint">
                 No habitat data available.
               </p>
             ) : (
@@ -311,23 +311,23 @@ export default function PokemonDetailPage() {
                 {pokemon.habitats.map((hab) => (
                   <div
                     key={hab.name}
-                    className="rounded-lg border border-slate-700/60 bg-slate-800/50 p-3"
+                    className="rounded-lg border border-edge/60 bg-panel/50 p-3"
                   >
                     <div className="mb-2 flex items-center justify-between gap-2">
-                      <span className="font-medium text-slate-200">
+                      <span className="font-medium text-ink-soft">
                         {hab.name}
                       </span>
                       <Pill
                         className={
                           RARITY_COLORS[hab.rarity] ??
-                          'bg-slate-700 text-slate-400'
+                          'bg-chip text-muted'
                         }
                       >
                         {hab.rarity}
                       </Pill>
                     </div>
                     <div className="mb-2">
-                      <p className="mb-1 text-xs text-slate-500">Areas</p>
+                      <p className="mb-1 text-xs text-faint">Areas</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
                         {Object.entries(hab.areas).map(
                           ([area, available]) => (
@@ -336,7 +336,7 @@ export default function PokemonDetailPage() {
                               className={`flex items-center gap-1 text-xs ${
                                 available
                                   ? 'text-emerald-400'
-                                  : 'text-slate-600'
+                                  : 'text-faint'
                               }`}
                             >
                               {available ? '✓' : '✗'} {area}
@@ -345,7 +345,7 @@ export default function PokemonDetailPage() {
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
                       {hab.time.length > 0 && (
                         <span>🕐 {hab.time.join(', ')}</span>
                       )}
@@ -362,34 +362,34 @@ export default function PokemonDetailPage() {
           {/* Card 3: Food Preferences */}
           <Card title="Food Preferences">
             <div className="mb-4">
-              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-faint">
                 Preferred Flavor
               </p>
-              <p className="text-sm font-medium text-slate-200">
+              <p className="text-sm font-medium text-ink-soft">
                 {pokemon.flavor}
               </p>
             </div>
 
             {foods.length > 0 ? (
               <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-faint">
                   Matching Foods
                 </p>
                 <ul className="space-y-2">
                   {foods.map((food) => (
                     <li
                       key={food.name}
-                      className="flex items-center justify-between rounded-md border border-slate-700/50 bg-slate-800/40 px-3 py-2"
+                      className="flex items-center justify-between rounded-md border border-edge/50 bg-panel/40 px-3 py-2"
                     >
                       <div>
-                        <span className="text-sm text-slate-200">
+                        <span className="text-sm text-ink-soft">
                           {food.name}
                         </span>
-                        <span className="ml-2 text-xs text-slate-500">
+                        <span className="ml-2 text-xs text-faint">
                           {food.category}
                         </span>
                       </div>
-                      <Pill className="border-indigo-500/30 bg-indigo-500/20 text-indigo-300">
+                      <Pill className="border-accent/30 bg-accent/20 text-accent-soft">
                         {food.move}
                       </Pill>
                     </li>
@@ -397,7 +397,7 @@ export default function PokemonDetailPage() {
                 </ul>
               </div>
             ) : (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-faint">
                 No food data for this flavor.
               </p>
             )}
@@ -406,12 +406,12 @@ export default function PokemonDetailPage() {
 
         {/* Roommates */}
         <section className="mt-10">
-          <h2 className="mb-6 text-2xl font-bold text-slate-100">
+          <h2 className="mb-6 text-2xl font-bold text-ink">
             Best Roommates
           </h2>
 
           {sortedScores.length === 0 ? (
-            <p className="text-slate-500">No roommate data available.</p>
+            <p className="text-faint">No roommate data available.</p>
           ) : (
             <div className="space-y-8">
               {sortedScores.map((score) => (
@@ -422,12 +422,12 @@ export default function PokemonDetailPage() {
                     {SCORE_LABELS[score] ?? `Score ${score}`} ({score}/5)
                   </h3>
 
-                  <div className="overflow-hidden rounded-xl border border-slate-700 bg-slate-800">
+                  <div className="overflow-hidden rounded-xl border border-edge bg-panel">
                     {roommatesByScore[score].map((rm, i) => (
                       <div
                         key={rm.id}
                         className={`flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 ${
-                          i > 0 ? 'border-t border-slate-700/60' : ''
+                          i > 0 ? 'border-t border-edge/60' : ''
                         }`}
                       >
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center">
@@ -444,13 +444,13 @@ export default function PokemonDetailPage() {
                           />
                         </div>
 
-                        <span className="w-12 shrink-0 text-sm font-mono text-slate-500">
+                        <span className="w-12 shrink-0 text-sm font-mono text-faint">
                           {rm.number}
                         </span>
 
                         <Link
                           href={`/pokemon/${rm.id}`}
-                          className="min-w-[120px] text-sm font-medium text-indigo-400 transition-colors hover:text-indigo-300"
+                          className="min-w-[120px] text-sm font-medium text-accent-soft transition-colors hover:text-ink"
                         >
                           {rm.name}
                         </Link>
@@ -470,7 +470,7 @@ export default function PokemonDetailPage() {
                               <Link
                                 key={fav}
                                 href={`/favorites/${toFavoriteSlug(fav)}`}
-                                className="inline-flex items-center rounded-full border border-slate-600 bg-slate-700/60 px-2 py-0.5 text-xs text-slate-400 transition-colors hover:border-indigo-500/50 hover:text-indigo-300"
+                                className="inline-flex items-center rounded-full border border-edge-muted bg-chip/60 px-2 py-0.5 text-xs text-muted transition-colors hover:border-accent/50 hover:text-accent-soft"
                               >
                                 {fav}
                               </Link>

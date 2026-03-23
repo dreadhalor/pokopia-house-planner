@@ -21,7 +21,7 @@ function confidenceTier(score: number): {
 } {
   if (score >= 20) return { label: 'High', color: 'text-emerald-400', dots: 3 };
   if (score >= 10) return { label: 'Medium', color: 'text-amber-400', dots: 2 };
-  return { label: 'Low', color: 'text-slate-500', dots: 1 };
+  return { label: 'Low', color: 'text-faint', dots: 1 };
 }
 
 function ConfidenceDots({ score }: { score: number }) {
@@ -31,7 +31,7 @@ function ConfidenceDots({ score }: { score: number }) {
       {[1, 2, 3].map((i) => (
         <span
           key={i}
-          className={`inline-block h-1.5 w-1.5 rounded-full ${i <= dots ? 'bg-current' : 'bg-slate-700'}`}
+          className={`inline-block h-1.5 w-1.5 rounded-full ${i <= dots ? 'bg-current' : 'bg-chip'}`}
         />
       ))}
     </span>
@@ -41,7 +41,7 @@ function ConfidenceDots({ score }: { score: number }) {
 function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
-      className={`h-5 w-5 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+      className={`h-5 w-5 text-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -57,7 +57,7 @@ function ItemImage({ src, alt }: { src: string; alt: string }) {
   if (error) {
     return (
       <svg
-        className="h-6 w-6 text-slate-500"
+        className="h-6 w-6 text-faint"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -93,19 +93,19 @@ export default function FavoriteCategoryPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-indigo-400" />
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-edge-muted border-t-accent-soft" />
       </div>
     );
   }
 
   if (!category) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950">
-        <p className="text-slate-400">Category not found.</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-canvas">
+        <p className="text-muted">Category not found.</p>
         <Link
           href="/pokemon"
-          className="text-indigo-400 transition hover:text-indigo-300"
+          className="text-accent-soft transition hover:text-ink"
         >
           &larr; Back to Pokédex
         </Link>
@@ -114,23 +114,23 @@ export default function FavoriteCategoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-canvas px-4 py-10 text-ink sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
         <Link
           href="/pokemon"
-          className="mb-6 inline-flex items-center gap-1 text-sm text-indigo-400 transition hover:text-indigo-300"
+          className="mb-6 inline-flex items-center gap-1 text-sm text-accent-soft transition hover:text-ink"
         >
           &larr; Back to Pokédex
         </Link>
 
         <div className="mb-10">
-          <h1 className="mb-3 text-3xl font-bold text-slate-100">
+          <h1 className="font-display mb-3 text-3xl font-semibold text-ink">
             {category.name}
           </h1>
-          <p className="max-w-2xl leading-relaxed text-slate-400">
+          <p className="max-w-2xl leading-relaxed text-muted">
             {category.description}
           </p>
-          <div className="mt-3 flex gap-4 text-sm text-slate-500">
+          <div className="mt-3 flex gap-4 text-sm text-faint">
             <span>{category.itemCount} matching items</span>
             <span>&middot;</span>
             <span>{category.pokemonCount} Pokémon love this</span>
@@ -143,15 +143,15 @@ export default function FavoriteCategoryPage() {
             onClick={() => setItemsOpen(!itemsOpen)}
             className="mb-2 flex w-full cursor-pointer items-center justify-between text-left"
           >
-            <h2 className="text-xl font-semibold text-slate-100">
+            <h2 className="text-xl font-semibold text-ink">
               Matching Items
-              <span className="ml-2 text-base font-normal text-slate-500">
+              <span className="ml-2 text-base font-normal text-faint">
                 ({category.items.length})
               </span>
             </h2>
             <ChevronIcon open={itemsOpen} />
           </button>
-          <p className="mb-4 text-sm text-slate-500">
+          <p className="mb-4 text-sm text-faint">
             Sorted by match confidence (
             <span className="inline-flex items-baseline gap-0.5">
               <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-emerald-400" />
@@ -160,9 +160,9 @@ export default function FavoriteCategoryPage() {
             </span>
             {' '}high &rarr;{' '}
             <span className="inline-flex items-baseline gap-0.5">
-              <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-slate-500" />
-              <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-slate-700" />
-              <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-slate-700" />
+              <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-faint" />
+              <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-chip" />
+              <span className="inline-block h-1.5 w-1.5 translate-y-[-1px] rounded-full bg-chip" />
             </span>
             {' '}low). Serebii’s favorites pages list which items count for each
             favorite in practice; we treat those as the official reference, even
@@ -174,8 +174,8 @@ export default function FavoriteCategoryPage() {
           {itemsOpen && (
             <>
               {category.items.length === 0 ? (
-                <div className="rounded-xl border border-slate-700 bg-slate-800/50 py-12 text-center">
-                  <p className="text-slate-500">No matching items found.</p>
+                <div className="rounded-xl border border-edge bg-panel/50 py-12 text-center">
+                  <p className="text-faint">No matching items found.</p>
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -187,15 +187,15 @@ export default function FavoriteCategoryPage() {
                     return (
                       <div
                         key={`${item.category}-${item.slug}`}
-                        className="flex gap-3 rounded-xl border border-slate-700 bg-slate-800 p-4 transition-colors hover:border-slate-600"
+                        className="flex gap-3 rounded-xl border border-edge bg-panel p-4 transition-colors hover:border-edge-muted"
                       >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-700/50">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-chip/50">
                           <ItemImage src={item.image} alt={item.name} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-slate-100">
+                              <h3 className="font-medium text-ink">
                                 {item.name}
                               </h3>
                               <ConfidenceDots score={item.confidence} />
@@ -208,13 +208,13 @@ export default function FavoriteCategoryPage() {
                                   {item.tag}
                                 </span>
                               )}
-                              <span className="rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-400">
+                              <span className="rounded-full bg-chip px-2 py-0.5 text-xs text-muted">
                                 {item.category}
                               </span>
                             </div>
                           </div>
                           {item.description && (
-                            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-400">
+                            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted">
                               {item.description}
                             </p>
                           )}
@@ -234,9 +234,9 @@ export default function FavoriteCategoryPage() {
             onClick={() => setPokemonOpen(!pokemonOpen)}
             className="mb-4 flex w-full cursor-pointer items-center justify-between text-left"
           >
-            <h2 className="text-xl font-semibold text-slate-100">
+            <h2 className="text-xl font-semibold text-ink">
               Pokémon Who Love This
-              <span className="ml-2 text-base font-normal text-slate-500">
+              <span className="ml-2 text-base font-normal text-faint">
                 ({category.pokemon.length})
               </span>
             </h2>
@@ -246,8 +246,8 @@ export default function FavoriteCategoryPage() {
           {pokemonOpen && (
             <>
               {category.pokemon.length === 0 ? (
-                <div className="rounded-xl border border-slate-700 bg-slate-800/50 py-12 text-center">
-                  <p className="text-slate-500">No Pokémon found.</p>
+                <div className="rounded-xl border border-edge bg-panel/50 py-12 text-center">
+                  <p className="text-faint">No Pokémon found.</p>
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -255,9 +255,9 @@ export default function FavoriteCategoryPage() {
                     <Link
                       key={p.id}
                       href={`/pokemon/${p.id}`}
-                      className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-800 p-4 transition-colors hover:border-slate-600"
+                      className="flex items-center gap-3 rounded-xl border border-edge bg-panel p-4 transition-colors hover:border-edge-muted"
                     >
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-700/50">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-chip/50">
                         <Image
                           src={p.sprite}
                           alt={p.name}
@@ -272,14 +272,14 @@ export default function FavoriteCategoryPage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-slate-500">
+                          <span className="font-mono text-xs text-faint">
                             {p.number}
                           </span>
-                          <span className="font-medium text-indigo-400">
+                          <span className="font-medium text-accent-soft">
                             {p.name}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-faint">
                           {p.idealHabitat}
                         </p>
                       </div>
@@ -288,9 +288,9 @@ export default function FavoriteCategoryPage() {
                 </div>
               )}
 
-              <div className="mt-4 rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
-                <p className="text-sm text-slate-500">
-                  <span className="font-medium text-slate-400">Note:</span> The
+              <div className="mt-4 rounded-lg border border-edge/50 bg-panel/30 p-4">
+                <p className="text-sm text-faint">
+                  <span className="font-medium text-muted">Note:</span> The
                   game data only includes Pokémon favorites (what they love), not
                   dislikes. There is no known data source for Pokémon preference
                   dislikes.

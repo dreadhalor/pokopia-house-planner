@@ -26,9 +26,11 @@ export default function HabitatsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-10 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-canvas px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <h1 className="mb-8 text-3xl font-bold text-slate-100">Habitats</h1>
+        <h1 className="font-display mb-8 text-3xl font-semibold text-ink">
+          Habitats
+        </h1>
 
         {/* Search & Filters */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -37,17 +39,17 @@ export default function HabitatsPage() {
             placeholder="Search habitats…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className="flex-1 rounded-lg border border-edge bg-panel px-4 py-2.5 text-ink placeholder:text-faint outline-none transition focus:border-accent focus:ring-1 focus:ring-accent"
           />
-          <div className="flex gap-1 rounded-lg bg-slate-800 p-1">
+          <div className="flex gap-1 rounded-lg bg-panel p-1">
             {filters.map((f) => (
               <button
                 key={f.value}
                 onClick={() => setFilter(f.value)}
                 className={`rounded-md px-4 py-1.5 text-sm font-medium transition ${
                   filter === f.value
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-cta text-white'
+                    : 'text-muted hover:text-ink-soft'
                 }`}
               >
                 {f.label}
@@ -58,7 +60,7 @@ export default function HabitatsPage() {
 
         {/* Count */}
         {habitats && (
-          <p className="mb-4 text-sm text-slate-400">
+          <p className="mb-4 text-sm text-muted">
             {habitats.length} habitat{habitats.length !== 1 && 's'} found
           </p>
         )}
@@ -66,7 +68,7 @@ export default function HabitatsPage() {
         {/* Loading */}
         {isLoading && (
           <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-indigo-400" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-edge-muted border-t-accent-soft" />
           </div>
         )}
 
@@ -77,10 +79,10 @@ export default function HabitatsPage() {
               <Link
                 key={habitat.id}
                 href={`/habitats/${habitat.id}`}
-                className="group rounded-xl border border-slate-700 bg-slate-800 p-5 transition hover:border-slate-600 hover:bg-slate-800/80"
+                className="group rounded-xl border border-edge bg-panel p-5 transition hover:border-edge-muted hover:bg-panel/80"
               >
                 <div className="mb-2 flex items-center gap-2">
-                  <span className="font-mono text-xs text-slate-500">
+                  <span className="font-mono text-xs text-faint">
                     {habitat.id}
                   </span>
                   {habitat.isEvent && (
@@ -89,10 +91,10 @@ export default function HabitatsPage() {
                     </span>
                   )}
                 </div>
-                <h2 className="mb-1.5 text-lg font-semibold text-slate-100 group-hover:text-indigo-300 transition">
+                <h2 className="mb-1.5 text-lg font-semibold text-ink group-hover:text-accent-soft transition">
                   {habitat.name}
                 </h2>
-                <p className="line-clamp-2 text-sm leading-relaxed text-slate-400">
+                <p className="line-clamp-2 text-sm leading-relaxed text-muted">
                   {habitat.description}
                 </p>
               </Link>
@@ -102,7 +104,7 @@ export default function HabitatsPage() {
 
         {/* Empty state */}
         {habitats && habitats.length === 0 && !isLoading && (
-          <p className="py-20 text-center text-slate-500">
+          <p className="py-20 text-center text-faint">
             No habitats match your search.
           </p>
         )}

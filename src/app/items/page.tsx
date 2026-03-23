@@ -51,11 +51,11 @@ function ItemCard({ item }: { item: ItemResult }) {
   const tagStyle = item.tag ? TAG_COLORS[item.tag] : null;
 
   return (
-    <div className="flex gap-3 rounded-xl border border-slate-700 bg-slate-800 p-4 transition-colors hover:border-slate-600">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-700/50">
+    <div className="flex gap-3 rounded-xl border border-edge bg-panel p-4 transition-colors hover:border-edge-muted">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-chip/50">
         {imgError ? (
           <svg
-            className="h-6 w-6 text-slate-500"
+            className="h-6 w-6 text-faint"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -80,7 +80,7 @@ function ItemCard({ item }: { item: ItemResult }) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-medium text-slate-100">{item.name}</h3>
+          <h3 className="font-medium text-ink">{item.name}</h3>
           <div className="flex shrink-0 gap-1.5">
             {tagStyle && (
               <span
@@ -89,18 +89,18 @@ function ItemCard({ item }: { item: ItemResult }) {
                 {item.tag}
               </span>
             )}
-            <span className="rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-400">
+            <span className="rounded-full bg-chip px-2 py-0.5 text-xs text-muted">
               {item.category}
             </span>
           </div>
         </div>
         {item.description && (
-          <p className="mt-1 text-sm leading-relaxed text-slate-400 line-clamp-2">
+          <p className="mt-1 text-sm leading-relaxed text-muted line-clamp-2">
             {item.description}
           </p>
         )}
         {item.locations.length > 0 && (
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-faint">
             {item.locations.slice(0, 2).join(' · ')}
             {item.locations.length > 2 &&
               ` +${item.locations.length - 2} more`}
@@ -135,13 +135,13 @@ export default function ItemsPage() {
   }, [categories]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-canvas text-ink">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-50">
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">
             Item Encyclopedia
           </h1>
-          <p className="mt-2 text-slate-400">
+          <p className="mt-2 text-muted">
             Browse all {categories.reduce((s, c) => s + c.count, 0)} items
             available in Pokémon Pokopia.
           </p>
@@ -153,12 +153,12 @@ export default function ItemsPage() {
             placeholder="Search items…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-slate-100 placeholder:text-slate-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+            className="w-full rounded-lg border border-edge bg-panel px-4 py-3 text-ink placeholder:text-faint outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
           />
         </div>
 
         <div className="mb-4">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-faint">
             Category
           </p>
           <div className="flex flex-wrap gap-2">
@@ -166,8 +166,8 @@ export default function ItemsPage() {
               onClick={() => setCategory('')}
               className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
                 !category
-                  ? 'bg-indigo-500 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                  ? 'bg-cta text-white'
+                  : 'bg-panel text-muted hover:bg-chip hover:text-ink-soft'
               }`}
             >
               All ({categories.reduce((s, c) => s + c.count, 0)})
@@ -178,8 +178,8 @@ export default function ItemsPage() {
                 onClick={() => setCategory(cat)}
                 className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
                   category === cat
-                    ? 'bg-indigo-500 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                    ? 'bg-cta text-white'
+                    : 'bg-panel text-muted hover:bg-chip hover:text-ink-soft'
                 }`}
               >
                 {cat} ({categoryCounts[cat] ?? 0})
@@ -189,7 +189,7 @@ export default function ItemsPage() {
         </div>
 
         <div className="mb-6">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-faint">
             Tag
           </p>
           <div className="flex flex-wrap gap-2">
@@ -197,8 +197,8 @@ export default function ItemsPage() {
               onClick={() => setTag('')}
               className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
                 !tag
-                  ? 'bg-indigo-500 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                  ? 'bg-cta text-white'
+                  : 'bg-panel text-muted hover:bg-chip hover:text-ink-soft'
               }`}
             >
               Any tag
@@ -211,8 +211,8 @@ export default function ItemsPage() {
                   onClick={() => setTag(t.name)}
                   className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
                     tag === t.name
-                      ? `${style?.bg ?? 'bg-indigo-500'} ${style?.text ?? 'text-white'} ring-1 ring-current`
-                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                      ? `${style?.bg ?? 'bg-cta'} ${style?.text ?? 'text-white'} ring-1 ring-current`
+                      : 'bg-panel text-muted hover:bg-chip hover:text-ink-soft'
                   }`}
                 >
                   {t.name} ({t.count})
@@ -223,12 +223,12 @@ export default function ItemsPage() {
         </div>
 
         <div className="mb-4">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted">
             {isLoading ? (
               'Loading…'
             ) : (
               <>
-                <span className="font-semibold text-slate-200">
+                <span className="font-semibold text-ink-soft">
                   {results.length}
                 </span>{' '}
                 items found
@@ -244,8 +244,8 @@ export default function ItemsPage() {
         </div>
 
         {!isLoading && results.length === 0 && (
-          <div className="rounded-xl border border-slate-700 bg-slate-800/50 py-16 text-center">
-            <p className="text-slate-500">No items match your search.</p>
+          <div className="rounded-xl border border-edge bg-panel/50 py-16 text-center">
+            <p className="text-faint">No items match your search.</p>
           </div>
         )}
       </div>

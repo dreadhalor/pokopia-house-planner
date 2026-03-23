@@ -149,7 +149,7 @@ const columns = [
   columnHelper.accessor('number', {
     header: '#',
     cell: (info) => (
-      <span className="font-mono text-slate-400">{info.getValue()}</span>
+      <span className="font-mono text-muted">{info.getValue()}</span>
     ),
     sortingFn: (a, b) =>
       parseInt(a.original.id, 10) - parseInt(b.original.id, 10),
@@ -160,7 +160,7 @@ const columns = [
     cell: (info) => (
       <Link
         href={`/pokemon/${info.row.original.id}`}
-        className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+        className="font-medium text-accent-soft hover:text-ink transition-colors"
       >
         {info.getValue()}
       </Link>
@@ -179,7 +179,7 @@ const columns = [
         {info.getValue().map((s) => (
           <span
             key={s}
-            className="inline-block rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-300"
+            className="inline-block rounded-full bg-chip px-2 py-0.5 text-xs text-ink-soft"
           >
             {s}
           </span>
@@ -198,7 +198,7 @@ const columns = [
           ? 'text-amber-400'
           : rarity === 'Rare'
             ? 'text-sky-400'
-            : 'text-slate-400';
+            : 'text-muted';
       return <span className={`font-medium ${color}`}>{rarity}</span>;
     },
     sortingFn: (a, b) => {
@@ -223,13 +223,13 @@ function FilterSelect({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+      <label className="text-xs font-medium text-muted uppercase tracking-wide">
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+        className="rounded-lg border border-edge bg-panel px-3 py-2 text-sm text-ink-soft outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
       >
         <option value="">All</option>
         {options.map((opt) => (
@@ -279,14 +279,14 @@ export default function PokemonPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-canvas text-ink">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-50">
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-ink">
             Pokédex
           </h1>
-          <p className="mt-2 text-slate-400">
+          <p className="mt-2 text-muted">
             Search and filter Pokémon across the world of Pokopia.
           </p>
         </div>
@@ -298,7 +298,7 @@ export default function PokemonPage() {
             placeholder="Search by name…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-slate-100 placeholder:text-slate-500 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+            className="w-full rounded-lg border border-edge bg-panel px-4 py-3 text-ink placeholder:text-faint outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
           />
         </div>
 
@@ -338,17 +338,17 @@ export default function PokemonPage() {
 
         {/* Results count & clear */}
         <div className="mb-4 flex items-center justify-between">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted">
             {isLoading ? (
               'Loading…'
             ) : (
               <>
-                <span className="font-semibold text-slate-200">
+                <span className="font-semibold text-ink-soft">
                   {results.length}
                 </span>{' '}
                 Pokémon found
                 {activeFilterCount > 0 && (
-                  <span className="ml-1 text-slate-500">
+                  <span className="ml-1 text-faint">
                     ({activeFilterCount} filter
                     {activeFilterCount > 1 ? 's' : ''} active)
                   </span>
@@ -365,7 +365,7 @@ export default function PokemonPage() {
                 setRarity('');
                 setFlavor('');
               }}
-              className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer"
+              className="text-sm text-accent-soft hover:text-ink transition-colors cursor-pointer"
             >
               Clear filters
             </button>
@@ -373,17 +373,17 @@ export default function PokemonPage() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-lg border border-slate-700">
+        <div className="overflow-x-auto rounded-lg border border-edge">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-700 bg-slate-800/80">
+            <thead className="border-b border-edge bg-panel/80">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className={`px-4 py-3 font-semibold text-slate-300 ${
+                      className={`px-4 py-3 font-semibold text-ink-soft ${
                         header.column.getCanSort()
-                          ? 'cursor-pointer select-none hover:text-slate-100 transition-colors'
+                          ? 'cursor-pointer select-none hover:text-ink transition-colors'
                           : ''
                       }`}
                       style={{ width: header.getSize() }}
@@ -395,7 +395,7 @@ export default function PokemonPage() {
                           header.getContext(),
                         )}
                         {header.column.getCanSort() && (
-                          <span className="text-slate-500">
+                          <span className="text-faint">
                             {{
                               asc: '↑',
                               desc: '↓',
@@ -408,14 +408,14 @@ export default function PokemonPage() {
                 </tr>
               ))}
             </thead>
-            <tbody className="divide-y divide-slate-800">
+            <tbody className="divide-y divide-edge">
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="transition-colors hover:bg-slate-800/60"
+                  className="transition-colors hover:bg-panel/60"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-slate-200">
+                    <td key={cell.id} className="px-4 py-3 text-ink-soft">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -428,7 +428,7 @@ export default function PokemonPage() {
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="px-4 py-12 text-center text-slate-500"
+                    className="px-4 py-12 text-center text-faint"
                   >
                     No Pokémon match your search.
                   </td>
