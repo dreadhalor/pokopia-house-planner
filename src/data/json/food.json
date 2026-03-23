@@ -1,0 +1,127 @@
+[
+  {
+    "name": "Simple salad",
+    "boosts": "Leafage",
+    "flavor": ""
+  },
+  {
+    "name": "Leppa salad",
+    "boosts": "Leafage",
+    "flavor": "Sweet"
+  },
+  {
+    "name": "Seaweed salad",
+    "boosts": "Leafage",
+    "flavor": "Bitter"
+  },
+  {
+    "name": "Shredded salad",
+    "boosts": "Leafage",
+    "flavor": "Sour"
+  },
+  {
+    "name": "Crushed-berry salad",
+    "boosts": "Leafage",
+    "flavor": "Dry"
+  },
+  {
+    "name": "Crouton salad",
+    "boosts": "Leafage",
+    "flavor": "Spicy"
+  },
+  {
+    "name": "Simple soup",
+    "boosts": "Water Gun",
+    "flavor": ""
+  },
+  {
+    "name": "Seaweed soup",
+    "boosts": "Water Gun",
+    "flavor": "Bitter"
+  },
+  {
+    "name": "Mushroom soup",
+    "boosts": "Water Gun",
+    "flavor": "Dry"
+  },
+  {
+    "name": "Electrifying soup",
+    "boosts": "Water Gun",
+    "flavor": "Spicy"
+  },
+  {
+    "name": "Healthy soup",
+    "boosts": "Water Gun",
+    "flavor": "Spicy"
+  },
+  {
+    "name": "Flavorful soup",
+    "boosts": "Water Gun",
+    "flavor": "Sour"
+  },
+  {
+    "name": "Simple bread",
+    "boosts": "Cut",
+    "flavor": ""
+  },
+  {
+    "name": "Leppa bread",
+    "boosts": "Cut",
+    "flavor": "Sour"
+  },
+  {
+    "name": "Carrot bread",
+    "boosts": "Cut",
+    "flavor": "Spicy"
+  },
+  {
+    "name": "Recycled bread",
+    "boosts": "Cut",
+    "flavor": "Bitter"
+  },
+  {
+    "name": "Fluffy bread",
+    "boosts": "Cut",
+    "flavor": "Sweet"
+  },
+  {
+    "name": "Bread bowl",
+    "boosts": "Cut",
+    "flavor": "Spicy"
+  },
+  {
+    "name": "Simple hamburger steak",
+    "boosts": "Rock Smash",
+    "flavor": ""
+  },
+  {
+    "name": "Mushroom hamburger steak",
+    "boosts": "Rock Smash",
+    "flavor": "Dry"
+  },
+  {
+    "name": "Tomato hamburger steak",
+    "boosts": "Rock Smash",
+    "flavor": "Sour"
+  },
+  {
+    "name": "Potato hamburger steak",
+    "boosts": "Rock Smash",
+    "flavor": "Sweet"
+  },
+  {
+    "name": "Bitter hamburger steak",
+    "boosts": "Rock Smash",
+    "flavor": "Bitter"
+  },
+  {
+    "name": "Vibrant hamburger steak",
+    "boosts": "Rock Smash",
+    "flavor": ""
+  },
+  {
+    "name": "Berries",
+    "boosts": "Restore PP",
+    "flavor": ""
+  }
+]
