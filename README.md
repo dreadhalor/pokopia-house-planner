@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the planner. `/planner` redirects to `/`. Town saves live in `localStorage` under `pokopia-house-planner-towns-v1` (one-time migration from `nestmate-towns-v1` or `pokopedia-towns-v1` if present).
+Open [http://localhost:3000](http://localhost:3000) for the planner. `/planner` redirects to `/`. Town saves live in `localStorage` under `pokopedia-house-planner-towns-v1` (one-time migration from `pokopia-house-planner-towns-v1`, `nestmate-towns-v1`, or `pokopedia-towns-v1` if present).
 
 ## Scripts
 

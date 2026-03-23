@@ -1,4 +1,4 @@
-# Production deployments on pushes to pokopedia-house-planner (and manual runs).
+# Production deployments on pushes to main (and manual runs).
 # Requires repo secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
 # If you also use Vercel’s Git integration, disable one path to avoid double deploys.
 name: Vercel Production
@@ -10,7 +10,7 @@ env:
 on:
   push:
     branches:
-      - pokopedia-house-planner
+      - main
   workflow_dispatch:
 
 jobs:

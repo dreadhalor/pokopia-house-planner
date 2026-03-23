@@ -8,8 +8,12 @@ import {
 /** Max saved towns per browser (localStorage stays small). */
 export const MAX_TOWNS = 64;
 
-const STORAGE_KEY = 'pokopia-house-planner-towns-v1';
-const LEGACY_KEYS = ['nestmate-towns-v1', 'pokopedia-towns-v1'] as const;
+const STORAGE_KEY = 'pokopedia-house-planner-towns-v1';
+const LEGACY_KEYS = [
+  'pokopia-house-planner-towns-v1',
+  'nestmate-towns-v1',
+  'pokopedia-towns-v1',
+] as const;
 
 function migratingLocalStorage(): StateStorage {
   return {

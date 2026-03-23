@@ -35,9 +35,9 @@ const slugs = [...names].map(n =>
   n.toLowerCase().replace(/[''é ]/g, ch => ch === 'é' ? 'e' : '').replace(/[^a-z0-9]/g, '')
 );
 slugs.forEach(s => console.log(s));
-" | sort -u > /tmp/pokopia-house-planner-item-slugs.txt
+" | sort -u > /tmp/pokopedia-house-planner-item-slugs.txt
 
-TOTAL=$(wc -l < /tmp/pokopia-house-planner-item-slugs.txt | tr -d ' ')
+TOTAL=$(wc -l < /tmp/pokopedia-house-planner-item-slugs.txt | tr -d ' ')
 COUNT=0
 
 while IFS= read -r slug; do
@@ -54,6 +54,6 @@ while IFS= read -r slug; do
     echo "  WARN: Failed ($HTTP_CODE) for $slug"
   fi
   sleep 0.15
-done < /tmp/pokopia-house-planner-item-slugs.txt
+done < /tmp/pokopedia-house-planner-item-slugs.txt
 
 echo "Done! Downloaded item images to $DEST"
