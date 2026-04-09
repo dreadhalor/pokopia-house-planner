@@ -53,6 +53,14 @@ export type SavedTown = {
   updatedAt: number;
 };
 
+/** Last `partitionTown` request for a town; restored when reopening the planner if inputs still match. */
+export type PlannerPartitionSnapshot = {
+  pokemonIds: string[];
+  housesOf2: number | null;
+  housesOf4: number | null;
+  deepOptimize: boolean;
+};
+
 function newTownId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID();
@@ -75,6 +83,7 @@ function makeTown(name: string): SavedTown {
 type TownsState = {
   towns: SavedTown[];
   activeTownId: string | null;
+  plannerPartitionByTownId: Record<string, PlannerPartitionSnapshot>;
   ensureDefaultTown: () => void;
   addTown: (name: string) => string | null;
   deleteTown: (id: string) => void;
@@ -99,6 +108,10 @@ type TownsState = {
     skippedLimit: number;
     firstNewId: string | null;
   };
+  setPlannerPartitionSnapshot: (
+    townId: string,
+    snapshot: PlannerPartitionSnapshot | null,
+  ) => void;
 };
 
 export const useTownsStore = create<TownsState>()(
@@ -106,6 +119,7 @@ export const useTownsStore = create<TownsState>()(
     (set, get) => ({
       towns: [],
       activeTownId: null,
+      plannerPartitionByTownId: {},
 
       ensureDefaultTown: () => {
         const { towns, activeTownId } = get();
@@ -128,11 +142,17 @@ export const useTownsStore = create<TownsState>()(
       },
 
       deleteTown: (id) => {
-        const { towns, activeTownId } = get();
+        const { towns, activeTownId, plannerPartitionByTownId } = get();
         const next = towns.filter((t) => t.id !== id);
         const nextActive =
           activeTownId === id ? (next[0]?.id ?? null) : activeTownId;
-        set({ towns: next, activeTownId: nextActive });
+        const nextPlanner = { ...plannerPartitionByTownId };
+        delete nextPlanner[id];
+        set({
+          towns: next,
+          activeTownId: nextActive,
+          plannerPartitionByTownId: nextPlanner,
+        });
         if (next.length === 0) {
           get().ensureDefaultTown();
         }
@@ -211,6 +231,18 @@ export const useTownsStore = create<TownsState>()(
           firstNewId: resolved[0]?.id ?? null,
         };
       },
+
+      setPlannerPartitionSnapshot: (townId, snapshot) => {
+        const prev = get().plannerPartitionByTownId;
+        if (snapshot === null) {
+          const { [townId]: _, ...rest } = prev;
+          set({ plannerPartitionByTownId: rest });
+          return;
+        }
+        set({
+          plannerPartitionByTownId: { ...prev, [townId]: snapshot },
+        });
+      },
     }),
     {
       name: STORAGE_KEY,
@@ -218,7 +250,16 @@ export const useTownsStore = create<TownsState>()(
       partialize: (s) => ({
         towns: s.towns,
         activeTownId: s.activeTownId,
+        plannerPartitionByTownId: s.plannerPartitionByTownId,
       }),
+      merge: (persisted, current) => {
+        const p = persisted as Partial<TownsState>;
+        return {
+          ...current,
+          ...p,
+          plannerPartitionByTownId: p.plannerPartitionByTownId ?? {},
+        };
+      },
       skipHydration: true,
     },
   ),

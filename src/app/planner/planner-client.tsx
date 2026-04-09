@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { pokemon } from '@/data';
@@ -244,6 +244,9 @@ export default function PlannerPage() {
   const updateActivePokemonIds = useTownsStore((s) => s.updateActivePokemonIds);
   const setActiveHouses = useTownsStore((s) => s.setActiveHouses);
   const mergeImportedTowns = useTownsStore((s) => s.mergeImportedTowns);
+  const setPlannerPartitionSnapshot = useTownsStore(
+    (s) => s.setPlannerPartitionSnapshot,
+  );
 
   const selectedIds = activeTown?.pokemonIds ?? [];
   const housesOf2 =
@@ -275,6 +278,8 @@ export default function PlannerPage() {
 
   const partition = trpc.planner.partitionTown.useQuery(partitionArgs!, {
     enabled: partitionArgs !== null,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
   });
 
   const analysis = trpc.planner.analyze.useQuery(
@@ -458,14 +463,43 @@ export default function PlannerPage() {
   }, [backupNotice]);
 
   function runPartition() {
-    if (!canSuggestHousing) return;
-    setPartitionArgs({
+    if (!canSuggestHousing || !activeTownId) return;
+    const args = {
       pokemonIds: [...selectedIds],
       housesOf2,
       housesOf4,
       deepOptimize,
-    });
+    };
+    setPartitionArgs(args);
+    setPlannerPartitionSnapshot(activeTownId, args);
   }
+
+  const rosterKey = useMemo(() => selectedIds.join(','), [selectedIds]);
+
+  useLayoutEffect(() => {
+    if (!storeReady || !activeTownId) return;
+    const snap =
+      useTownsStore.getState().plannerPartitionByTownId[activeTownId];
+    if (!snap) {
+      setPartitionArgs(null);
+      return;
+    }
+    if (
+      snap.pokemonIds.join(',') !== rosterKey ||
+      snap.housesOf2 !== housesOf2 ||
+      snap.housesOf4 !== housesOf4
+    ) {
+      setPartitionArgs(null);
+      return;
+    }
+    setDeepOptimize(snap.deepOptimize);
+    setPartitionArgs({
+      pokemonIds: [...snap.pokemonIds],
+      housesOf2: snap.housesOf2,
+      housesOf4: snap.housesOf4,
+      deepOptimize: snap.deepOptimize,
+    });
+  }, [storeReady, activeTownId, rosterKey, housesOf2, housesOf4]);
 
   const partData = partition.data;
   const partitionError =
