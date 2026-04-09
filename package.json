@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build:serebii-favorites": "npx tsx scripts/build-serebii-favorite-map.ts",
+    "build:game-data": "npx tsx src/scripts/parse-data.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -24,6 +25,7 @@
     "@trpc/client": "^11.13.4",
     "@trpc/react-query": "^11.13.4",
     "@trpc/server": "^11.13.4",
+    "@vercel/analytics": "^2.0.1",
     "next": "16.1.7",
     "react": "19.2.3",
     "react-dom": "19.2.3",

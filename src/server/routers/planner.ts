@@ -7,7 +7,7 @@ import {
   sharedFavoritesForGroup,
   buildHouseCapsFromMaxes,
   optimizeTownHousing,
-  rankedItemsForHouse,
+  houseFurnishingSuggestions,
 } from '../housing';
 
 export const plannerRouter = router({
@@ -147,18 +147,23 @@ export const plannerRouter = router({
         return { ok: false as const, error: opt.error };
       }
 
-      const houses = opt.result.houses.map((h) => ({
-        index: h.index,
-        capacity: h.capacity,
-        idealHabitat: h.idealHabitat,
-        compatibilityScore: h.compatibilityScore,
-        sharedFavorites: h.sharedFavorites,
-        pokemon: h.members.map((p) => ({
-          ...p,
-          sprite: getSpriteUrl(p.name),
-        })),
-        suggestedItems: rankedItemsForHouse(h.members, 12),
-      }));
+      const houses = opt.result.houses.map((h) => {
+        const { suggestedItems, furnishingByCategory } =
+          houseFurnishingSuggestions(h.members, 12);
+        return {
+          index: h.index,
+          capacity: h.capacity,
+          idealHabitat: h.idealHabitat,
+          compatibilityScore: h.compatibilityScore,
+          sharedFavorites: h.sharedFavorites,
+          pokemon: h.members.map((p) => ({
+            ...p,
+            sprite: getSpriteUrl(p.name),
+          })),
+          suggestedItems,
+          furnishingByCategory,
+        };
+      });
 
       return {
         ok: true as const,

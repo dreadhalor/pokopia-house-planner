@@ -1,7 +1,6 @@
-// server-only — reads fixture built by scripts/build-serebii-favorite-map.ts
-import { readFileSync } from 'fs';
-import { join } from 'path';
+// Fixture built by scripts/build-serebii-favorite-map.ts
 import type { Pokemon } from './pokemon';
+import serebiiFavoriteItemsByCategory from './raw/serebii-favorite-items-by-category.json';
 import {
   favoriteCategories,
   getFavoriteCategoryByName,
@@ -10,18 +9,7 @@ import { getItemBySlug, getItemImagePath } from './items';
 
 type ByPageKey = Record<string, string[]>;
 
-const jsonPath = join(
-  process.cwd(),
-  'src/data/raw/serebii-favorite-items-by-category.json',
-);
-
-let byPageKey: ByPageKey | null = null;
-function getByPageKey(): ByPageKey {
-  if (!byPageKey) {
-    byPageKey = JSON.parse(readFileSync(jsonPath, 'utf-8')) as ByPageKey;
-  }
-  return byPageKey;
-}
+const byPageKey = serebiiFavoriteItemsByCategory as ByPageKey;
 
 /** Serebii favorites URL path segment (e.g. strangestuff) for a category id. */
 export function pageKeyForCategoryId(categoryId: string): string | null {
@@ -35,7 +23,7 @@ export function serebiiFavoritesPageUrl(pageKey: string): string {
 
 /** Item slugs Serebii lists for this category page (empty if unknown page). */
 export function getSerebiiSlugsForPageKey(pageKey: string): string[] {
-  const list = getByPageKey()[pageKey];
+  const list = byPageKey[pageKey];
   return list ? [...list] : [];
 }
 
@@ -100,7 +88,7 @@ export function serebiiDocumentedFavoritesForItem(
     for (const f of favs) {
       const key = pageKeyForFavoriteName(f);
       if (!key) continue;
-      const slugs = getByPageKey()[key];
+      const slugs = byPageKey[key];
       if (!slugs?.includes(itemSlug)) continue;
       const cat = getFavoriteCategoryByName(f);
       if (cat) hits.add(cat.name);

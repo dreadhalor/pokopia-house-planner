@@ -3,7 +3,14 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { pokemon } from '@/data';
 import { trpc } from '@/lib/trpc';
+import {
+  parseTownBackupJson,
+  stringifyTownBackup,
+  townBackupFilename,
+  type ParseTownBackupResult,
+} from '@/lib/towns-backup';
 import { useTownsStore, MAX_TOWNS } from '@/stores/towns-store';
 import type { SuggestedHouseItem } from '@/server/housing';
 
@@ -211,6 +218,16 @@ export default function PlannerPage() {
     Record<number, boolean>
   >({});
   const [showFurnishingIdeas, setShowFurnishingIdeas] = useState(false);
+  /** House index → `all` or favorite-category id for furnishing list. */
+  const [furnishCategoryByHouse, setFurnishCategoryByHouse] = useState<
+    Record<number, string>
+  >({});
+  const [backupNotice, setBackupNotice] = useState<{
+    kind: 'success' | 'error';
+    text: string;
+  } | null>(null);
+  const [backupPaste, setBackupPaste] = useState('');
+  const importFileRef = useRef<HTMLInputElement>(null);
   const lastPlanKeyRef = useRef<string | null>(null);
   const houseSectionRefs = useRef<Partial<Record<number, HTMLElement>>>({});
 
@@ -226,6 +243,7 @@ export default function PlannerPage() {
   const setActiveTownId = useTownsStore((s) => s.setActiveTownId);
   const updateActivePokemonIds = useTownsStore((s) => s.updateActivePokemonIds);
   const setActiveHouses = useTownsStore((s) => s.setActiveHouses);
+  const mergeImportedTowns = useTownsStore((s) => s.mergeImportedTowns);
 
   const selectedIds = activeTown?.pokemonIds ?? [];
   const housesOf2 =
@@ -343,6 +361,78 @@ export default function PlannerPage() {
     deleteTown(activeTownId);
   }
 
+  async function handleCopyTownBackup() {
+    const json = stringifyTownBackup(towns);
+    try {
+      await navigator.clipboard.writeText(json);
+      setBackupNotice({
+        kind: 'success',
+        text: 'Copied full towns backup to the clipboard.',
+      });
+    } catch {
+      setBackupNotice({
+        kind: 'error',
+        text: 'Could not copy to the clipboard (permission or browser).',
+      });
+    }
+  }
+
+  function handleDownloadTownBackup() {
+    const json = stringifyTownBackup(towns);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = townBackupFilename();
+    a.click();
+    URL.revokeObjectURL(url);
+    setBackupNotice({
+      kind: 'success',
+      text: 'Download started.',
+    });
+  }
+
+  function applyParsedImport(parsed: Extract<ParseTownBackupResult, { ok: true }>) {
+    const r = mergeImportedTowns(parsed.towns);
+    const parts = [`Imported ${r.added} town(s).`];
+    if (r.skippedLimit > 0) {
+      parts.push(
+        `${r.skippedLimit} not added (limit ${MAX_TOWNS} saved towns).`,
+      );
+    }
+    if (parsed.strippedPokemonIds > 0) {
+      parts.push(
+        `Dropped ${parsed.strippedPokemonIds} unknown Pokémon id(s) for this app version.`,
+      );
+    }
+    setPartitionArgs(null);
+    setBackupPaste('');
+    setBackupNotice({ kind: 'success', text: parts.join(' ') });
+  }
+
+  function handleImportPaste() {
+    const parsed = parseTownBackupJson(backupPaste, validPokemonIds);
+    if (!parsed.ok) {
+      setBackupNotice({ kind: 'error', text: parsed.error });
+      return;
+    }
+    applyParsedImport(parsed);
+  }
+
+  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    void file.text().then((text) => {
+      const parsed = parseTownBackupJson(text, validPokemonIds);
+      if (!parsed.ok) {
+        setBackupNotice({ kind: 'error', text: parsed.error });
+        return;
+      }
+      applyParsedImport(parsed);
+    });
+  }
+
   const townsSorted = useMemo(
     () => [...towns].sort((a, b) => a.name.localeCompare(b.name)),
     [towns],
@@ -355,6 +445,17 @@ export default function PlannerPage() {
     }
     return m;
   }, [fullDex.data]);
+
+  const validPokemonIds = useMemo(
+    () => new Set(pokemon.map((p) => p.id)),
+    [],
+  );
+
+  useEffect(() => {
+    if (!backupNotice) return;
+    const t = setTimeout(() => setBackupNotice(null), 7000);
+    return () => clearTimeout(t);
+  }, [backupNotice]);
 
   function runPartition() {
     if (!canSuggestHousing) return;
@@ -404,6 +505,7 @@ export default function PlannerPage() {
     setSetupDetailsOpen(false);
     setHouseDetailsOpen({});
     setShowFurnishingIdeas(false);
+    setFurnishCategoryByHouse({});
   }, [planKey]);
 
   function toggleHouseDetail(index: number) {
@@ -588,6 +690,87 @@ export default function PlannerPage() {
               </button>
             </div>
           </div>
+
+          <details className="mt-4 border-t border-dashed border-edge pt-3">
+            <summary className="cursor-pointer text-xs font-medium text-muted hover:text-ink-soft">
+              Backup &amp; restore (file or clipboard)
+            </summary>
+            <div className="mt-3 space-y-3">
+              {backupNotice && (
+                <p
+                  className={
+                    backupNotice.kind === 'success'
+                      ? 'text-xs text-green-500'
+                      : 'text-xs text-red-400'
+                  }
+                  role="status"
+                >
+                  {backupNotice.text}
+                </p>
+              )}
+              <p className="text-xs text-faint">
+                Exports every saved town as versioned JSON. Import{' '}
+                <strong className="font-medium text-muted">merges</strong> new
+                towns; ids that already exist here get new ids. Unknown Pokémon
+                ids are removed. Maximum {MAX_TOWNS} towns total.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleCopyTownBackup()}
+                  className="rounded-lg border border-edge-muted bg-inset px-3 py-2 text-xs font-medium text-ink-soft hover:bg-panel"
+                >
+                  Copy JSON
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadTownBackup}
+                  className="rounded-lg border border-edge-muted bg-inset px-3 py-2 text-xs font-medium text-ink-soft hover:bg-panel"
+                >
+                  Download .json
+                </button>
+                <button
+                  type="button"
+                  onClick={() => importFileRef.current?.click()}
+                  className="rounded-lg border border-edge-muted bg-inset px-3 py-2 text-xs font-medium text-ink-soft hover:bg-panel"
+                >
+                  Import file…
+                </button>
+                <input
+                  ref={importFileRef}
+                  type="file"
+                  accept="application/json,.json"
+                  className="sr-only"
+                  onChange={handleImportFile}
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="town-backup-paste"
+                  className="block text-xs font-medium text-muted"
+                >
+                  Or paste backup JSON
+                </label>
+                <textarea
+                  id="town-backup-paste"
+                  value={backupPaste}
+                  onChange={(e) => setBackupPaste(e.target.value)}
+                  rows={5}
+                  spellCheck={false}
+                  autoComplete="off"
+                  placeholder='{ "app": "pokopedia-house-planner", ... }'
+                  className="w-full resize-y rounded-lg border border-edge-muted bg-inset px-3 py-2 font-mono text-[11px] leading-relaxed text-ink placeholder:text-faint"
+                />
+                <button
+                  type="button"
+                  onClick={handleImportPaste}
+                  className="rounded-lg bg-cta px-3 py-2 text-xs font-medium text-white hover:bg-cta-hover"
+                >
+                  Import from pasted JSON
+                </button>
+              </div>
+            </div>
+          </details>
         </section>
 
         {/* Roster + layout (collapsible when you have a plan) */}
@@ -1146,27 +1329,102 @@ export default function PlannerPage() {
                                   >
                                     Browse Serebii lists
                                   </Link>
-                                  .
+                                  . Pick a category to focus on items everyone
+                                  (or most roommates) agrees on.
                                 </p>
-                                <div className="mt-4">
-                                  {house.suggestedItems.length === 0 ? (
-                                    <p className="mt-2 text-sm text-faint">
-                                      No overlapping Serebii-listed items for this
-                                      house yet—their pages may still be sparse for
-                                      these favorites.
-                                    </p>
-                                  ) : (
-                                    <ol className="mt-2 space-y-2">
-                                      {house.suggestedItems.map((item, rank) => (
-                                        <FurnishingItemRow
-                                          key={item.slug}
-                                          item={item}
-                                          rank={rank + 1}
-                                        />
-                                      ))}
-                                    </ol>
-                                  )}
-                                </div>
+                                {(() => {
+                                  const furnishingByCategory =
+                                    house.furnishingByCategory ?? [];
+                                  const optionIds = new Set([
+                                    'all',
+                                    ...furnishingByCategory.map(
+                                      (c) => c.categoryId,
+                                    ),
+                                  ]);
+                                  const preferred =
+                                    furnishCategoryByHouse[house.index] ??
+                                    furnishingByCategory[0]?.categoryId ??
+                                    'all';
+                                  const furnishSelectValue = optionIds.has(
+                                    preferred,
+                                  )
+                                    ? preferred
+                                    : furnishingByCategory[0]?.categoryId ??
+                                      'all';
+                                  const displayItems =
+                                    furnishSelectValue === 'all'
+                                      ? house.suggestedItems
+                                      : (
+                                          furnishingByCategory.find(
+                                            (c) =>
+                                              c.categoryId === furnishSelectValue,
+                                          )?.suggestedItems ?? []);
+                                  return (
+                                    <div className="mt-4 space-y-3">
+                                      {furnishingByCategory.length > 0 && (
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                          <label className="flex min-w-0 flex-1 flex-col gap-1">
+                                            <span className="text-[11px] font-medium uppercase tracking-wide text-faint">
+                                              Favorite category
+                                            </span>
+                                            <select
+                                              value={furnishSelectValue}
+                                              onChange={(e) =>
+                                                setFurnishCategoryByHouse(
+                                                  (prev) => ({
+                                                    ...prev,
+                                                    [house.index]: e.target.value,
+                                                  }),
+                                                )
+                                              }
+                                              className="w-full max-w-md rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm text-ink-soft"
+                                            >
+                                              <option value="all">
+                                                All categories (mixed top picks)
+                                              </option>
+                                              {furnishingByCategory.map((c) => (
+                                                <option
+                                                  key={c.categoryId}
+                                                  value={c.categoryId}
+                                                >
+                                                  {c.categoryName}
+                                                  {c.unanimous
+                                                    ? ' — everyone'
+                                                    : ` — ${c.memberCount}/${c.totalMembers}`}
+                                                </option>
+                                              ))}
+                                            </select>
+                                          </label>
+                                          {furnishSelectValue !== 'all' && (
+                                            <Link
+                                              href={`/favorite-items/${furnishSelectValue}`}
+                                              className="shrink-0 text-xs text-accent-soft underline-offset-2 hover:underline sm:pt-5"
+                                            >
+                                              Open Serebii-style list →
+                                            </Link>
+                                          )}
+                                        </div>
+                                      )}
+                                      {displayItems.length === 0 ? (
+                                        <p className="mt-2 text-sm text-faint">
+                                          No overlapping Serebii-listed items for
+                                          this house yet—their pages may still be
+                                          sparse for these favorites.
+                                        </p>
+                                      ) : (
+                                        <ol className="mt-2 space-y-2">
+                                          {displayItems.map((item, rank) => (
+                                            <FurnishingItemRow
+                                              key={`${furnishSelectValue}-${item.slug}`}
+                                              item={item}
+                                              rank={rank + 1}
+                                            />
+                                          ))}
+                                        </ol>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </>
                             )}
                           </div>

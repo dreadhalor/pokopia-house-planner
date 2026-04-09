@@ -1,6 +1,4 @@
-// server-only
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import rawItemsJson from './raw/serebii-items.json';
 
 export interface Item {
   name: string;
@@ -39,8 +37,7 @@ interface RawSerebiiItem {
   imageUrl: string;
 }
 
-const jsonPath = join(process.cwd(), 'src/data/raw/serebii-items.json');
-const rawItems: RawSerebiiItem[] = JSON.parse(readFileSync(jsonPath, 'utf-8'));
+const rawItems = rawItemsJson as RawSerebiiItem[];
 
 export const items: Item[] = rawItems.map((raw) => ({
   name: raw.name,

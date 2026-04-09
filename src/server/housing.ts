@@ -2,8 +2,10 @@ import type { Item } from '@/data/items';
 import type { Pokemon } from '@/data/pokemon';
 import {
   items,
+  favoriteCategories,
   getItemImagePath,
   getFavoriteCategoryByName,
+  pageKeyForCategoryId,
   serebiiDocumentedFavoritesForItem,
 } from '@/data';
 
@@ -28,9 +30,15 @@ export function compatibilityScoreForGroup(selected: Pokemon[]): number {
     }
   }
   const maxPossibleOverlap = maxPairs * 5;
-  return maxPossibleOverlap > 0
-    ? Math.round((pairwiseScore / maxPossibleOverlap) * 100)
-    : 100;
+  const pairwisePct =
+    maxPossibleOverlap > 0
+      ? Math.round((pairwiseScore / maxPossibleOverlap) * 100)
+      : 100;
+  const unanimousCount = sharedFavoritesForGroup(selected).length;
+  return Math.min(
+    100,
+    pairwisePct + unanimousCount * UNANIMOUS_FAVORITE_BONUS_POINTS,
+  );
 }
 
 export function sharedFavoritesForGroup(selected: Pokemon[]): string[] {
@@ -73,6 +81,8 @@ export function itemScoreForPokemon(item: Item, p: Pokemon): number {
 }
 
 const DISAGREEMENT_WEIGHT = 0.35;
+/** Extra compatibility % per favorite that appears in every member's top five (decor theme with no conflicts). */
+const UNANIMOUS_FAVORITE_BONUS_POINTS = 12;
 const MAX_BRUTE_PARTITION = 11;
 const MAX_BRUTE_SUBSET = 11;
 
@@ -846,6 +856,161 @@ export type SuggestedHouseItem = {
   serebiiDocumentedFavorites: string[];
 };
 
+/** Serebii-backed favorite category names a Pokémon contributes (top five + flavor). */
+function serebiiFavoriteCategoryNamesForMember(p: Pokemon): Set<string> {
+  const out = new Set<string>();
+  const favs = [...p.favorites.slice(0, 5)];
+  if (p.flavor) favs.push(p.flavor);
+  for (const f of favs) {
+    const cat = getFavoriteCategoryByName(f);
+    if (!cat || cat.id.endsWith('-flavors')) continue;
+    if (!pageKeyForCategoryId(cat.id)) continue;
+    out.add(cat.name);
+  }
+  return out;
+}
+
+/**
+ * Favorite categories that have a Serebii list, ordered by how many roommates
+ * care about them (unanimous first), then name.
+ */
+export function rankedFurnishingCategoriesForHouse(members: Pokemon[]): {
+  categoryId: string;
+  categoryName: string;
+  memberCount: number;
+}[] {
+  if (members.length === 0) return [];
+  const counts = new Map<string, number>();
+  for (const p of members) {
+    for (const name of serebiiFavoriteCategoryNamesForMember(p)) {
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+  }
+  const nameToId = new Map<string, string>();
+  for (const c of favoriteCategories) {
+    if (c.id.endsWith('-flavors')) continue;
+    if (!pageKeyForCategoryId(c.id)) continue;
+    nameToId.set(c.name, c.id);
+  }
+  return [...counts.entries()]
+    .map(([categoryName, memberCount]) => ({
+      categoryId: nameToId.get(categoryName) ?? categoryName,
+      categoryName,
+      memberCount,
+    }))
+    .sort((a, b) => {
+      if (b.memberCount !== a.memberCount) return b.memberCount - a.memberCount;
+      return a.categoryName.localeCompare(b.categoryName);
+    });
+}
+
+export type HouseFurnishingCategoryBucket = {
+  categoryId: string;
+  categoryName: string;
+  memberCount: number;
+  totalMembers: number;
+  unanimous: boolean;
+  suggestedItems: SuggestedHouseItem[];
+};
+
+function buildSuggestedHouseItemIfEligible(
+  item: Item,
+  members: Pokemon[],
+): SuggestedHouseItem | null {
+  if (!isPlaceableItem(item)) return null;
+  const serebiiDocumentedFavorites = serebiiDocumentedFavoritesForItem(
+    item.slug,
+    members,
+  );
+  if (serebiiDocumentedFavorites.length === 0) return null;
+
+  const perPokemon = members.map((p) => {
+    let score = itemScoreForPokemon(item, p);
+    const nameHits = new Set(
+      [...p.favorites.slice(0, 5), p.flavor]
+        .map((f) => getFavoriteCategoryByName(f)?.name)
+        .filter((n): n is string => Boolean(n)),
+    );
+    const cares = serebiiDocumentedFavorites.some((c) => nameHits.has(c));
+    if (cares && score < 1) score = 1;
+    return { id: p.id, name: p.name, score };
+  });
+
+  const scores = perPokemon.map((x) => x.score);
+  const totalAppeal = scores.reduce((a, b) => a + b, 0);
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
+  const disagreement = max - min;
+  const balanceScore = totalAppeal - DISAGREEMENT_WEIGHT * disagreement;
+
+  return {
+    name: item.name,
+    slug: item.slug,
+    image: getItemImagePath(item),
+    category: item.category,
+    tag: item.tag,
+    totalAppeal,
+    disagreement,
+    balanceScore,
+    perPokemon,
+    serebiiDocumentedFavorites,
+  };
+}
+
+/**
+ * Top placeable Serebii-listed items plus the same items grouped by favorite category
+ * (categories ordered by roommate agreement).
+ */
+export function houseFurnishingSuggestions(
+  members: Pokemon[],
+  limit: number,
+): {
+  suggestedItems: SuggestedHouseItem[];
+  furnishingByCategory: HouseFurnishingCategoryBucket[];
+} {
+  if (members.length === 0) {
+    return { suggestedItems: [], furnishingByCategory: [] };
+  }
+
+  const allRows: SuggestedHouseItem[] = [];
+  for (const item of items) {
+    const row = buildSuggestedHouseItemIfEligible(item, members);
+    if (row) allRows.push(row);
+  }
+  allRows.sort((a, b) => b.balanceScore - a.balanceScore);
+  const suggestedItems = allRows.slice(0, limit);
+
+  const rankedMeta = rankedFurnishingCategoriesForHouse(members);
+  const buckets = new Map<string, SuggestedHouseItem[]>();
+  for (const m of rankedMeta) {
+    buckets.set(m.categoryName, []);
+  }
+  for (const row of allRows) {
+    for (const catName of row.serebiiDocumentedFavorites) {
+      const b = buckets.get(catName);
+      if (b) b.push(row);
+    }
+  }
+
+  const totalMembers = members.length;
+  const furnishingByCategory: HouseFurnishingCategoryBucket[] = rankedMeta.map(
+    (m) => {
+      const list = [...(buckets.get(m.categoryName) ?? [])];
+      list.sort((a, b) => b.balanceScore - a.balanceScore);
+      return {
+        categoryId: m.categoryId,
+        categoryName: m.categoryName,
+        memberCount: m.memberCount,
+        totalMembers,
+        unanimous: m.memberCount === totalMembers,
+        suggestedItems: list.slice(0, limit),
+      };
+    },
+  );
+
+  return { suggestedItems, furnishingByCategory };
+}
+
 /**
  * Ranked placeable items that appear on Serebii’s per-category favorites lists
  * for this house’s favorites (and flavor). Keyword heuristics are not used for inclusion.
@@ -854,49 +1019,5 @@ export function rankedItemsForHouse(
   members: Pokemon[],
   limit: number,
 ): SuggestedHouseItem[] {
-  const ranked: SuggestedHouseItem[] = [];
-
-  for (const item of items) {
-    if (!isPlaceableItem(item)) continue;
-    const serebiiDocumentedFavorites = serebiiDocumentedFavoritesForItem(
-      item.slug,
-      members,
-    );
-    if (serebiiDocumentedFavorites.length === 0) continue;
-
-    const perPokemon = members.map((p) => {
-      let score = itemScoreForPokemon(item, p);
-      const nameHits = new Set(
-        [...p.favorites.slice(0, 5), p.flavor]
-          .map((f) => getFavoriteCategoryByName(f)?.name)
-          .filter((n): n is string => Boolean(n)),
-      );
-      const cares = serebiiDocumentedFavorites.some((c) => nameHits.has(c));
-      if (cares && score < 1) score = 1;
-      return { id: p.id, name: p.name, score };
-    });
-
-    const scores = perPokemon.map((x) => x.score);
-    const totalAppeal = scores.reduce((a, b) => a + b, 0);
-    const min = Math.min(...scores);
-    const max = Math.max(...scores);
-    const disagreement = max - min;
-    const balanceScore = totalAppeal - DISAGREEMENT_WEIGHT * disagreement;
-
-    ranked.push({
-      name: item.name,
-      slug: item.slug,
-      image: getItemImagePath(item),
-      category: item.category,
-      tag: item.tag,
-      totalAppeal,
-      disagreement,
-      balanceScore,
-      perPokemon,
-      serebiiDocumentedFavorites,
-    });
-  }
-
-  ranked.sort((a, b) => b.balanceScore - a.balanceScore);
-  return ranked.slice(0, limit);
+  return houseFurnishingSuggestions(members, limit).suggestedItems;
 }

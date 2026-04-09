@@ -1,12 +1,21 @@
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { pokemon } from '../data/pokemon';
-import { habitats } from '../data/habitats';
-import { specialties } from '../data/specialties';
+import { parsePokemonCSV } from '../data/pokemon-parse';
+import { parseHabitatsMd } from '../data/habitats-parse';
+import { parseSpecialtiesTxt } from '../data/specialties-parse';
 import { food } from '../data/food';
 
 const outDir = join(process.cwd(), 'src/data/json');
 mkdirSync(outDir, { recursive: true });
+
+const csvPath = join(process.cwd(), 'src/data/raw/Pokopia.csv');
+const pokemon = parsePokemonCSV(readFileSync(csvPath, 'utf-8'));
+
+const mdPath = join(process.cwd(), 'src/data/raw/Habitats.md');
+const habitats = parseHabitatsMd(readFileSync(mdPath, 'utf-8'));
+
+const txtPath = join(process.cwd(), 'src/data/raw/Specialties.txt');
+const specialties = parseSpecialtiesTxt(readFileSync(txtPath, 'utf-8'));
 
 writeFileSync(
   join(outDir, 'pokemon.json'),

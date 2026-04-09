@@ -90,6 +90,15 @@ type TownsState = {
     next: string[] | ((prev: string[]) => string[]),
   ) => void;
   setActiveHouses: (housesOf2: number | null, housesOf4: number | null) => void;
+  /**
+   * Append imported towns; assigns new ids when they collide with existing towns.
+   * Respects MAX_TOWNS; activates the first newly added town when any are added.
+   */
+  mergeImportedTowns: (incoming: SavedTown[]) => {
+    added: number;
+    skippedLimit: number;
+    firstNewId: string | null;
+  };
 };
 
 export const useTownsStore = create<TownsState>()(
@@ -168,6 +177,39 @@ export const useTownsStore = create<TownsState>()(
         const id = get().activeTownId;
         if (!id) return;
         get().patchTown(id, { housesOf2, housesOf4 });
+      },
+
+      mergeImportedTowns: (incoming) => {
+        const { towns, activeTownId } = get();
+        const remaining = MAX_TOWNS - towns.length;
+        if (remaining <= 0) {
+          return {
+            added: 0,
+            skippedLimit: incoming.length,
+            firstNewId: null,
+          };
+        }
+        const slice = incoming.slice(0, remaining);
+        const existingIds = new Set(towns.map((t) => t.id));
+        const resolved: SavedTown[] = [];
+        for (const t of slice) {
+          let id = t.id;
+          if (existingIds.has(id)) {
+            id = newTownId();
+          }
+          existingIds.add(id);
+          resolved.push({ ...t, id, updatedAt: Date.now() });
+        }
+        set({
+          towns: [...towns, ...resolved],
+          activeTownId:
+            resolved.length > 0 ? resolved[0]!.id : activeTownId,
+        });
+        return {
+          added: resolved.length,
+          skippedLimit: incoming.length - slice.length,
+          firstNewId: resolved[0]?.id ?? null,
+        };
       },
     }),
     {
