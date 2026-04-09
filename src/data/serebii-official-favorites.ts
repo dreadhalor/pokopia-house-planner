@@ -2,7 +2,11 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import type { Pokemon } from './pokemon';
-import { getFavoriteCategoryByName } from './favorite-categories';
+import {
+  favoriteCategories,
+  getFavoriteCategoryByName,
+} from './favorite-categories';
+import { getItemBySlug, getItemImagePath } from './items';
 
 type ByPageKey = Record<string, string[]>;
 
@@ -19,16 +23,71 @@ function getByPageKey(): ByPageKey {
   return byPageKey;
 }
 
+/** Serebii favorites URL path segment (e.g. strangestuff) for a category id. */
+export function pageKeyForCategoryId(categoryId: string): string | null {
+  if (categoryId.endsWith('-flavors')) return null;
+  return categoryId.replace(/-/g, '');
+}
+
+export function serebiiFavoritesPageUrl(pageKey: string): string {
+  return `https://www.serebii.net/pokemonpokopia/favorites/${pageKey}.shtml`;
+}
+
+/** Item slugs Serebii lists for this category page (empty if unknown page). */
+export function getSerebiiSlugsForPageKey(pageKey: string): string[] {
+  const list = getByPageKey()[pageKey];
+  return list ? [...list] : [];
+}
+
+export function getSerebiiSlugsForCategoryId(categoryId: string): string[] {
+  const key = pageKeyForCategoryId(categoryId);
+  if (!key) return [];
+  return getSerebiiSlugsForPageKey(key);
+}
+
+export type SerebiiResolvedItem = {
+  slug: string;
+  name: string;
+  description: string;
+  category: string;
+  tag: string;
+  image: string;
+};
+
+/** Resolve Serebii slugs to app items (skips unknown slugs). */
+export function resolveSerebiiSlugsToItems(slugs: string[]): SerebiiResolvedItem[] {
+  const out: SerebiiResolvedItem[] = [];
+  for (const slug of slugs) {
+    const item = getItemBySlug(slug);
+    if (!item) continue;
+    out.push({
+      slug: item.slug,
+      name: item.name,
+      description: item.description,
+      category: item.category,
+      tag: item.tag,
+      image: getItemImagePath(item),
+    });
+  }
+  return out;
+}
+
+/** Categories that map to a Serebii favorites page (excludes flavor-only rows). */
+export function listSerebiiFavoriteCategoryIds(): string[] {
+  return favoriteCategories
+    .filter((c) => !c.id.endsWith('-flavors'))
+    .map((c) => c.id);
+}
+
 function pageKeyForFavoriteName(name: string): string | null {
   const cat = getFavoriteCategoryByName(name);
   if (!cat || cat.id.endsWith('-flavors')) return null;
-  return cat.id.replace(/-/g, '');
+  return pageKeyForCategoryId(cat.id);
 }
 
 /**
  * Names of favorite categories (from this house’s Pokémon) for which Serebii’s
- * category page lists this item. Empty when the item is not on any relevant
- * Serebii list — ranking then relies only on keyword heuristics.
+ * category page lists this item. Empty when the item is not on any relevant list.
  */
 export function serebiiDocumentedFavoritesForItem(
   itemSlug: string,

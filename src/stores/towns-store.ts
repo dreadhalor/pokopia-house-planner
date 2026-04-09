@@ -46,8 +46,10 @@ export type SavedTown = {
   id: string;
   name: string;
   pokemonIds: string[];
-  housesOf2: number;
-  housesOf4: number;
+  /** Maximum 2-bed houses; null = no cap (auto). */
+  housesOf2: number | null;
+  /** Maximum 4-bed houses; null = no cap (auto). */
+  housesOf4: number | null;
   updatedAt: number;
 };
 
@@ -64,8 +66,8 @@ function makeTown(name: string): SavedTown {
     id: newTownId(),
     name: trimmed,
     pokemonIds: [],
-    housesOf2: 0,
-    housesOf4: 1,
+    housesOf2: null,
+    housesOf4: null,
     updatedAt: Date.now(),
   };
 }
@@ -87,7 +89,7 @@ type TownsState = {
   updateActivePokemonIds: (
     next: string[] | ((prev: string[]) => string[]),
   ) => void;
-  setActiveHouses: (housesOf2: number, housesOf4: number) => void;
+  setActiveHouses: (housesOf2: number | null, housesOf4: number | null) => void;
 };
 
 export const useTownsStore = create<TownsState>()(

@@ -7,6 +7,11 @@ import {
   items,
   getItemImagePath,
   getSpriteUrl,
+  pageKeyForCategoryId,
+  serebiiFavoritesPageUrl,
+  getSerebiiSlugsForCategoryId,
+  resolveSerebiiSlugsToItems,
+  listSerebiiFavoriteCategoryIds,
 } from '@/data';
 
 function pokemonMatchesCategory(
@@ -80,6 +85,49 @@ export const favoritesRouter = router({
         pokemonCount: matchingPokemon.length,
         items: matchingItems,
         itemCount: matchingItems.length,
+      };
+    }),
+
+  /** Serebii-scraped favorite lists: one row per object category with counts. */
+  serebiiIndex: publicProcedure.query(() => {
+    const ids = listSerebiiFavoriteCategoryIds();
+    return ids.map((id) => {
+      const cat = getFavoriteCategoryById(id);
+      const pageKey = pageKeyForCategoryId(id);
+      const slugs = pageKey ? getSerebiiSlugsForCategoryId(id) : [];
+      const resolved = resolveSerebiiSlugsToItems(slugs);
+      return {
+        id,
+        name: cat?.name ?? id,
+        description: cat?.description ?? '',
+        serebiiItemCount: slugs.length,
+        resolvedItemCount: resolved.length,
+        serebiiUrl: pageKey ? serebiiFavoritesPageUrl(pageKey) : null,
+      };
+    });
+  }),
+
+  serebiiCategory: publicProcedure
+    .input(favoriteCategoryBySlugSchema)
+    .query(({ input }) => {
+      const category = getFavoriteCategoryById(input.slug);
+      if (!category || category.id.endsWith('-flavors')) return null;
+
+      const pageKey = pageKeyForCategoryId(category.id);
+      if (!pageKey) return null;
+
+      const slugs = getSerebiiSlugsForCategoryId(category.id);
+      const itemsResolved = resolveSerebiiSlugsToItems(slugs);
+
+      return {
+        id: category.id,
+        name: category.name,
+        description: category.description,
+        examples: category.examples,
+        serebiiUrl: serebiiFavoritesPageUrl(pageKey),
+        pageKey,
+        slugsOnSerebii: slugs.length,
+        items: itemsResolved,
       };
     }),
 });

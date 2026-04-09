@@ -26,7 +26,16 @@ export {
   getFavoriteCategoryByName,
   getFavoriteCategoryById,
 } from './favorite-categories';
-export { serebiiDocumentedFavoritesForItem } from './serebii-official-favorites';
+export {
+  serebiiDocumentedFavoritesForItem,
+  pageKeyForCategoryId,
+  serebiiFavoritesPageUrl,
+  getSerebiiSlugsForPageKey,
+  getSerebiiSlugsForCategoryId,
+  resolveSerebiiSlugsToItems,
+  listSerebiiFavoriteCategoryIds,
+  type SerebiiResolvedItem,
+} from './serebii-official-favorites';
 export {
   getSpriteUrl,
   getSpriteUrlOrFallback,

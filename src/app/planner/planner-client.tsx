@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { trpc } from '@/lib/trpc';
 import { useTownsStore, MAX_TOWNS } from '@/stores/towns-store';
 import type { SuggestedHouseItem } from '@/server/housing';
@@ -126,10 +127,7 @@ function FurnishingItemRow({
   item: SuggestedHouseItem;
   rank: number;
 }) {
-  const onSerebii = item.serebiiDocumentedFavorites.length > 0;
-  const serebiiTitle = onSerebii
-    ? `On Serebii’s list for: ${item.serebiiDocumentedFavorites.join(', ')}`
-    : 'Not on Serebii’s lists for this house’s favorites — keyword match only';
+  const serebiiTitle = `Serebii lists for: ${item.serebiiDocumentedFavorites.join(', ')}`;
   return (
     <li className="flex gap-3 rounded-lg border border-edge/80 bg-inset/40 p-2.5">
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-panel text-xs font-bold text-faint">
@@ -153,14 +151,10 @@ function FurnishingItemRow({
             {item.name}
           </span>
           <span
-            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ${
-              onSerebii
-                ? 'bg-emerald-500/15 text-emerald-300 ring-emerald-500/35'
-                : 'bg-chip/50 text-muted ring-edge-muted'
-            }`}
+            className="shrink-0 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-300 ring-1 ring-emerald-500/35"
             title={serebiiTitle}
           >
-            {onSerebii ? 'Serebii list' : 'Keyword guess'}
+            Serebii
           </span>
           <span className="text-[10px] text-faint">
             {item.category} · {item.tag}
@@ -207,8 +201,8 @@ export default function PlannerPage() {
   const [renameDraft, setRenameDraft] = useState('');
   const [partitionArgs, setPartitionArgs] = useState<{
     pokemonIds: string[];
-    housesOf2: number;
-    housesOf4: number;
+    housesOf2: number | null;
+    housesOf4: number | null;
     deepOptimize: boolean;
   } | null>(null);
   const [deepOptimize, setDeepOptimize] = useState(false);
@@ -217,9 +211,6 @@ export default function PlannerPage() {
     Record<number, boolean>
   >({});
   const [showFurnishingIdeas, setShowFurnishingIdeas] = useState(false);
-  const [heuristicFurnishingOpen, setHeuristicFurnishingOpen] = useState<
-    Record<number, boolean>
-  >({});
   const lastPlanKeyRef = useRef<string | null>(null);
   const houseSectionRefs = useRef<Partial<Record<number, HTMLElement>>>({});
 
@@ -237,8 +228,10 @@ export default function PlannerPage() {
   const setActiveHouses = useTownsStore((s) => s.setActiveHouses);
 
   const selectedIds = activeTown?.pokemonIds ?? [];
-  const housesOf2 = activeTown?.housesOf2 ?? 0;
-  const housesOf4 = activeTown?.housesOf4 ?? 1;
+  const housesOf2 =
+    activeTown?.housesOf2 !== undefined ? activeTown.housesOf2 : null;
+  const housesOf4 =
+    activeTown?.housesOf4 !== undefined ? activeTown.housesOf4 : null;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -276,9 +269,13 @@ export default function PlannerPage() {
     { enabled: selectedIds.length > 0 && selectedIds.length < 4 },
   );
 
-  const totalSlots = housesOf2 * 2 + housesOf4 * 4;
+  const bothHouseMaxesZero =
+    housesOf2 === 0 &&
+    housesOf4 === 0 &&
+    housesOf2 !== null &&
+    housesOf4 !== null;
   const canSuggestHousing =
-    selectedIds.length > 0 && totalSlots >= selectedIds.length;
+    selectedIds.length > 0 && !bothHouseMaxesZero;
 
   const filteredResults = (searchResult.data ?? []).filter(
     (p) => !selectedIds.includes(p.id),
@@ -298,7 +295,7 @@ export default function PlannerPage() {
   }, []);
 
   function addPokemon(id: string) {
-    if (selectedIds.length >= 48 || selectedIds.includes(id)) return;
+    if (selectedIds.includes(id)) return;
     updateActivePokemonIds((prev) => [...prev, id]);
     setSearchText('');
     setDropdownOpen(false);
@@ -459,8 +456,15 @@ export default function PlannerPage() {
             Add every Pok&eacute;mon in your town, choose how many 2- and 4-slot
             houses you have, then get a suggested split that keeps habitat types
             separate and lines up favorites. Each house can list ranked item
-            ideas (Serebii-backed where we have data, plus keyword guesses) with a
-            fairness penalty when one roommate scores much higher than others.
+            ideas from Serebii&apos;s favorite-item lists only (see the{' '}
+            <Link
+              href="/favorite-items"
+              className="text-accent-soft underline-offset-2 hover:underline"
+            >
+              Favorite items
+            </Link>{' '}
+            tab), with a fairness penalty when one roommate scores much higher than
+            others.
           </p>
           <p className="text-xs text-faint">
             Towns are saved in this browser (localStorage). Up to {MAX_TOWNS}{' '}
@@ -599,8 +603,8 @@ export default function PlannerPage() {
                   Town roster &amp; house layout
                 </h2>
                 <p className="mt-0.5 text-xs text-faint">
-                  Add Pok&eacute;mon and bed counts. Collapse this to focus on
-                  the plan below.
+                  Add Pok&eacute;mon and optional house maximums. Collapse this to
+                  focus on the plan below.
                 </p>
               </div>
               <Chevron open={setupDetailsOpen} />
@@ -613,7 +617,6 @@ export default function PlannerPage() {
             <h3 className="text-base font-semibold text-ink-soft">Your town</h3>
             <span className="text-sm text-muted">
               {selectedIds.length} Pok&eacute;mon
-              {selectedIds.length >= 48 ? ' (max)' : ''}
             </span>
           </div>
 
@@ -639,7 +642,6 @@ export default function PlannerPage() {
                     <button
                       type="button"
                       onClick={() => addPokemon(p.id)}
-                      disabled={selectedIds.length >= 48}
                       className="flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition hover:bg-chip disabled:opacity-40"
                     >
                       <span className="font-mono text-xs text-faint">
@@ -713,45 +715,54 @@ export default function PlannerPage() {
         <section className="space-y-4 rounded-xl border border-edge bg-inset/40 p-5">
           <h3 className="text-base font-semibold text-ink-soft">House layout</h3>
           <p className="text-sm text-muted">
-            Pokopia allows up to four Pok&eacute;mon per house, with matching
-            habitat type inside each home. You can list more beds than
-            Pok&eacute;mon — extra houses stay vacant and partly-filled houses
-            show open slots.
+            Each field is a <strong className="font-medium text-ink-soft">maximum</strong>{' '}
+            number of that house size. Leave a field blank for no limit — the planner
+            adds enough houses automatically, preferring 4-Pok&eacute;mon homes over
+            2-Pok&eacute;mon ones. Same habitat only inside each house; extra beds can
+            stay empty.
           </p>
           <div className="flex flex-wrap gap-6">
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted">
-                2-Pok&eacute;mon houses
+                Max 2-Pok&eacute;mon houses
               </span>
               <input
                 type="number"
                 min={0}
-                max={24}
-                value={housesOf2}
-                onChange={(e) =>
-                  setActiveHouses(
-                    Math.max(0, Math.min(24, +e.target.value || 0)),
-                    housesOf4,
-                  )
-                }
+                max={99}
+                placeholder="∞"
+                value={housesOf2 === null ? '' : housesOf2}
+                onChange={(e) => {
+                  const raw = e.target.value.trim();
+                  if (raw === '') {
+                    setActiveHouses(null, housesOf4);
+                    return;
+                  }
+                  const n = Math.max(0, Math.min(99, Number(raw) || 0));
+                  setActiveHouses(n, housesOf4);
+                }}
                 className="w-28 rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm tabular-nums"
               />
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted">
-                4-Pok&eacute;mon houses
+                Max 4-Pok&eacute;mon houses
               </span>
               <input
                 type="number"
                 min={0}
-                max={24}
-                value={housesOf4}
-                onChange={(e) =>
-                  setActiveHouses(
-                    housesOf2,
-                    Math.max(0, Math.min(24, +e.target.value || 0)),
-                  )
-                }
+                max={99}
+                placeholder="∞"
+                value={housesOf4 === null ? '' : housesOf4}
+                onChange={(e) => {
+                  const raw = e.target.value.trim();
+                  if (raw === '') {
+                    setActiveHouses(housesOf2, null);
+                    return;
+                  }
+                  const n = Math.max(0, Math.min(99, Number(raw) || 0));
+                  setActiveHouses(housesOf2, n);
+                }}
                 className="w-28 rounded-lg border border-edge-muted bg-inset px-3 py-2 text-sm tabular-nums"
               />
             </label>
@@ -763,23 +774,37 @@ export default function PlannerPage() {
                 : 'bg-inset text-muted'
             }`}
           >
-            <span className="font-medium tabular-nums">{totalSlots}</span> total
-            slots &middot;{' '}
+            {housesOf2 === null && housesOf4 === null ? (
+              <>
+                <span className="font-medium">Unlimited</span> house budget
+                (auto-sized; 4-bed first).
+              </>
+            ) : (
+              <>
+                Limits:{' '}
+                {housesOf4 === null ? (
+                  <span className="font-medium">∞</span>
+                ) : (
+                  <span className="font-medium tabular-nums">{housesOf4}</span>
+                )}{' '}
+                ×4-bed max,{' '}
+                {housesOf2 === null ? (
+                  <span className="font-medium">∞</span>
+                ) : (
+                  <span className="font-medium tabular-nums">{housesOf2}</span>
+                )}{' '}
+                ×2-bed max.
+              </>
+            )}{' '}
+            <span className="text-faint">&middot;</span>{' '}
             <span className="font-medium tabular-nums">
               {selectedIds.length}
             </span>{' '}
-            Pok&eacute;mon
-            {selectedIds.length > 0 && totalSlots < selectedIds.length && (
+            Pok&eacute;mon in town
+            {bothHouseMaxesZero && (
               <span className="text-amber-400">
                 {' '}
-                — add houses or beds so slots are at least your town size.
-              </span>
-            )}
-            {selectedIds.length > 0 && totalSlots > selectedIds.length && (
-              <span className="text-faint">
-                {' '}
-                ({totalSlots - selectedIds.length} spare bed
-                {totalSlots - selectedIds.length === 1 ? '' : 's'})
+                — raise at least one maximum or leave blank for unlimited.
               </span>
             )}
           </div>
@@ -1110,97 +1135,36 @@ export default function PlannerPage() {
                             ) : (
                               <>
                                 <p className="mt-1 text-xs text-faint">
-                                  Items on Serebii&apos;s category lists for this
-                                  house&apos;s favorites are shown first (best
-                                  documented). Below that, expand{' '}
-                                  <span className="text-muted">
-                                    Keyword guesses only
-                                  </span>{' '}
-                                  for keyword-ranked picks that are not on those
-                                  lists (including flavor matches, where we
-                                  don&apos;t map Serebii yet). Ranking still uses
-                                  keyword scores and a roommate-fairness penalty.
+                                  Only items that appear on Serebii&apos;s
+                                  favorites pages for this house&apos;s favorite
+                                  categories (and flavor) are listed. Ranking
+                                  uses keyword-style per-Pokémon scores where they
+                                  help break ties, plus a roommate-fairness penalty.{' '}
+                                  <Link
+                                    href="/favorite-items"
+                                    className="text-accent-soft underline-offset-2 hover:underline"
+                                  >
+                                    Browse Serebii lists
+                                  </Link>
+                                  .
                                 </p>
-                                <div className="mt-4 space-y-4">
-                                  <div>
-                                    <h5 className="text-[11px] font-semibold uppercase tracking-wide text-emerald-400/90">
-                                      Serebii lists (official)
-                                    </h5>
-                                    {house.suggestedItems.official.length ===
-                                    0 ? (
-                                      <p className="mt-2 text-sm text-faint">
-                                        No items from Serebii&apos;s pages for
-                                        this house&apos;s favorites (their lists
-                                        may be incomplete, or keyword matches
-                                        only appear below).
-                                      </p>
-                                    ) : (
-                                      <ol className="mt-2 space-y-2">
-                                        {house.suggestedItems.official.map(
-                                          (item, rank) => (
-                                            <FurnishingItemRow
-                                              key={item.slug}
-                                              item={item}
-                                              rank={rank + 1}
-                                            />
-                                          ),
-                                        )}
-                                      </ol>
-                                    )}
-                                  </div>
-                                  {house.suggestedItems.heuristic.length >
-                                    0 && (
-                                    <div className="rounded-lg border border-edge bg-inset/30">
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          setHeuristicFurnishingOpen((prev) => ({
-                                            ...prev,
-                                            [house.index]:
-                                              !prev[house.index],
-                                          }))
-                                        }
-                                        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm text-muted transition hover:bg-panel/50 hover:text-ink-soft"
-                                        aria-expanded={Boolean(
-                                          heuristicFurnishingOpen[house.index],
-                                        )}
-                                      >
-                                        <span>
-                                          <span className="font-medium text-ink-soft">
-                                            Keyword guesses only
-                                          </span>
-                                          <span className="ml-2 text-xs text-faint">
-                                            (
-                                            {
-                                              house.suggestedItems.heuristic
-                                                .length
-                                            }{' '}
-                                            items — not on Serebii for these
-                                            favorites)
-                                          </span>
-                                        </span>
-                                        <Chevron
-                                          open={Boolean(
-                                            heuristicFurnishingOpen[
-                                              house.index
-                                            ],
-                                          )}
+                                <div className="mt-4">
+                                  {house.suggestedItems.length === 0 ? (
+                                    <p className="mt-2 text-sm text-faint">
+                                      No overlapping Serebii-listed items for this
+                                      house yet—their pages may still be sparse for
+                                      these favorites.
+                                    </p>
+                                  ) : (
+                                    <ol className="mt-2 space-y-2">
+                                      {house.suggestedItems.map((item, rank) => (
+                                        <FurnishingItemRow
+                                          key={item.slug}
+                                          item={item}
+                                          rank={rank + 1}
                                         />
-                                      </button>
-                                      {heuristicFurnishingOpen[house.index] && (
-                                        <ol className="space-y-2 border-t border-edge px-3 py-3">
-                                          {house.suggestedItems.heuristic.map(
-                                            (item, rank) => (
-                                              <FurnishingItemRow
-                                                key={item.slug}
-                                                item={item}
-                                                rank={rank + 1}
-                                              />
-                                            ),
-                                          )}
-                                        </ol>
-                                      )}
-                                    </div>
+                                      ))}
+                                    </ol>
                                   )}
                                 </div>
                               </>
@@ -1264,7 +1228,6 @@ export default function PlannerPage() {
                       key={rec.id}
                       type="button"
                       onClick={() => addPokemon(rec.id)}
-                      disabled={selectedIds.length >= 48}
                       className="flex items-center gap-2 rounded-lg border border-edge bg-inset p-2 text-left text-sm hover:border-accent/40"
                     >
                       <Image

@@ -350,6 +350,11 @@ const NATIONAL_DEX_MAP: Record<string, number> = {
   'Dartrix': 723,
   'Decidueye': 724,
 
+  // Hoppip line (national dex; added post-launch in Pokopia)
+  'Hoppip': 187,
+  'Skiploom': 188,
+  'Jumpluff': 189,
+
   // #188-#190: Scorbunny line
   'Scorbunny': 813,
   'Raboot': 814,

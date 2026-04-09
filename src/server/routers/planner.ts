@@ -5,7 +5,7 @@ import {
   computePairwiseOverlap,
   compatibilityScoreForGroup,
   sharedFavoritesForGroup,
-  expandHouseCounts,
+  buildHouseCapsFromMaxes,
   optimizeTownHousing,
   rankedItemsForHouse,
 } from '../housing';
@@ -135,8 +135,11 @@ export const plannerRouter = router({
         };
       }
 
-      const caps = expandHouseCounts(input.housesOf2, input.housesOf4);
-      const opt = optimizeTownHousing(mons, caps, {
+      const built = buildHouseCapsFromMaxes(mons, input.housesOf4, input.housesOf2);
+      if (!built.ok) {
+        return { ok: false as const, error: built.error };
+      }
+      const opt = optimizeTownHousing(mons, built.caps, {
         deepOptimize: input.deepOptimize,
       });
 
@@ -154,7 +157,7 @@ export const plannerRouter = router({
           ...p,
           sprite: getSpriteUrl(p.name),
         })),
-        suggestedItems: rankedItemsForHouse(h.members, 10),
+        suggestedItems: rankedItemsForHouse(h.members, 12),
       }));
 
       return {

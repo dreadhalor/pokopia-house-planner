@@ -230,11 +230,100 @@ function enumerateHouseAssignments(
   });
 }
 
+/** @deprecated Prefer buildHouseCapsFromMaxes for partition input. */
 export function expandHouseCounts(housesOf2: number, housesOf4: number): number[] {
   return [
     ...Array.from({ length: housesOf4 }, () => 4),
     ...Array.from({ length: housesOf2 }, () => 2),
   ];
+}
+
+const HOUSE_CAP_BUILD_INF = 999;
+
+/**
+ * Build a concrete house capacity list from per-type maximums.
+ * `null` = unlimited for that size; prefer adding 4-bed houses before 2-bed.
+ */
+export function buildHouseCapsFromMaxes(
+  mons: Pokemon[],
+  max4: number | null,
+  max2: number | null,
+):
+  | { ok: true; caps: number[] }
+  | { ok: false; error: string } {
+  const n = mons.length;
+  if (n === 0) {
+    return { ok: true, caps: [] };
+  }
+
+  const u4 = max4 === null ? HOUSE_CAP_BUILD_INF : max4;
+  const u2 = max2 === null ? HOUSE_CAP_BUILD_INF : max2;
+
+  if (u4 === 0 && u2 === 0) {
+    return {
+      ok: false,
+      error:
+        'Set a higher maximum for at least one house type, or leave blank for unlimited.',
+    };
+  }
+
+  const byHabitat = new Map<string, number>();
+  for (const p of mons) {
+    byHabitat.set(p.idealHabitat, (byHabitat.get(p.idealHabitat) ?? 0) + 1);
+  }
+
+  let hMin = 0;
+  for (const c of byHabitat.values()) {
+    hMin += Math.ceil(c / 4);
+  }
+
+  let n4 = 0;
+  let n2 = 0;
+  let cap = 0;
+  let slots = 0;
+
+  while (slots < hMin && n4 < u4) {
+    n4++;
+    slots++;
+    cap += 4;
+  }
+  while (slots < hMin && n2 < u2) {
+    n2++;
+    slots++;
+    cap += 2;
+  }
+  if (slots < hMin) {
+    return {
+      ok: false,
+      error:
+        'These limits cannot fit every habitat — allow more 4-bed houses or leave maximums blank for unlimited.',
+    };
+  }
+
+  const ABS_MAX_HOUSES = 256;
+  while (cap < n && n4 < u4 && slots < ABS_MAX_HOUSES) {
+    n4++;
+    slots++;
+    cap += 4;
+  }
+  while (cap < n && n2 < u2 && slots < ABS_MAX_HOUSES) {
+    n2++;
+    slots++;
+    cap += 2;
+  }
+
+  if (cap < n) {
+    return {
+      ok: false,
+      error:
+        'Not enough capacity under these maximums — raise the limits or leave them blank for unlimited.',
+    };
+  }
+
+  return {
+    ok: true,
+    caps: [...Array.from({ length: n4 }, () => 4), ...Array.from({ length: n2 }, () => 2)],
+  };
 }
 
 function aggregateScores(
@@ -758,56 +847,56 @@ export type SuggestedHouseItem = {
 };
 
 /**
- * Splits suggestions: Serebii-documented first (by balance score), then keyword-only.
- * Each list is capped at `limit` entries.
+ * Ranked placeable items that appear on Serebii’s per-category favorites lists
+ * for this house’s favorites (and flavor). Keyword heuristics are not used for inclusion.
  */
 export function rankedItemsForHouse(
   members: Pokemon[],
   limit: number,
-): { official: SuggestedHouseItem[]; heuristic: SuggestedHouseItem[] } {
-  const ranked = items
-    .filter(isPlaceableItem)
-    .map((item) => {
-      const perPokemon = members.map((p) => ({
-        id: p.id,
-        name: p.name,
-        score: itemScoreForPokemon(item, p),
-      }));
-      const scores = perPokemon.map((x) => x.score);
-      const totalAppeal = scores.reduce((a, b) => a + b, 0);
-      if (totalAppeal === 0) return null;
-      const min = Math.min(...scores);
-      const max = Math.max(...scores);
-      const disagreement = max - min;
-      const balanceScore = totalAppeal - DISAGREEMENT_WEIGHT * disagreement;
-      const serebiiDocumentedFavorites = serebiiDocumentedFavoritesForItem(
-        item.slug,
-        members,
+): SuggestedHouseItem[] {
+  const ranked: SuggestedHouseItem[] = [];
+
+  for (const item of items) {
+    if (!isPlaceableItem(item)) continue;
+    const serebiiDocumentedFavorites = serebiiDocumentedFavoritesForItem(
+      item.slug,
+      members,
+    );
+    if (serebiiDocumentedFavorites.length === 0) continue;
+
+    const perPokemon = members.map((p) => {
+      let score = itemScoreForPokemon(item, p);
+      const nameHits = new Set(
+        [...p.favorites.slice(0, 5), p.flavor]
+          .map((f) => getFavoriteCategoryByName(f)?.name)
+          .filter((n): n is string => Boolean(n)),
       );
-      return {
-        name: item.name,
-        slug: item.slug,
-        image: getItemImagePath(item),
-        category: item.category,
-        tag: item.tag,
-        totalAppeal,
-        disagreement,
-        balanceScore,
-        perPokemon,
-        serebiiDocumentedFavorites,
-      };
-    })
-    .filter((x): x is NonNullable<typeof x> => x != null);
+      const cares = serebiiDocumentedFavorites.some((c) => nameHits.has(c));
+      if (cares && score < 1) score = 1;
+      return { id: p.id, name: p.name, score };
+    });
+
+    const scores = perPokemon.map((x) => x.score);
+    const totalAppeal = scores.reduce((a, b) => a + b, 0);
+    const min = Math.min(...scores);
+    const max = Math.max(...scores);
+    const disagreement = max - min;
+    const balanceScore = totalAppeal - DISAGREEMENT_WEIGHT * disagreement;
+
+    ranked.push({
+      name: item.name,
+      slug: item.slug,
+      image: getItemImagePath(item),
+      category: item.category,
+      tag: item.tag,
+      totalAppeal,
+      disagreement,
+      balanceScore,
+      perPokemon,
+      serebiiDocumentedFavorites,
+    });
+  }
 
   ranked.sort((a, b) => b.balanceScore - a.balanceScore);
-  const official = ranked.filter(
-    (r) => r.serebiiDocumentedFavorites.length > 0,
-  );
-  const heuristic = ranked.filter(
-    (r) => r.serebiiDocumentedFavorites.length === 0,
-  );
-  return {
-    official: official.slice(0, limit),
-    heuristic: heuristic.slice(0, limit),
-  };
+  return ranked.slice(0, limit);
 }

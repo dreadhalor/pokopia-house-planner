@@ -8,6 +8,7 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/pokemon', label: 'Pokédex' },
   { href: '/items', label: 'Items' },
+  { href: '/favorite-items', label: 'Favorite items' },
   { href: '/habitats', label: 'Habitats' },
 ];
 
@@ -29,7 +30,10 @@ export function Nav() {
           const isActive =
             link.href === '/'
               ? pathname === '/'
-              : pathname.startsWith(link.href);
+              : link.href === '/favorite-items'
+                ? pathname === '/favorite-items' ||
+                  pathname.startsWith('/favorite-items/')
+                : pathname.startsWith(link.href);
 
           return (
             <Link
